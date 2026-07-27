@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eatit - Svuota Frigo Intelligente</title>
+    <script type="text/javascript" src="https://gc.kes.v2.scr.kaspersky-labs.com/7EA5E9BB-55E1-4C31-9C21-4943DDFED2E4/main.js?attr=cuv_00juKJ7lNPm8SVF7ijxzZeep1FL5_E3Yx68xZrqAVox11Nbn8bEp_Tn8de-remuAnXWpLwmL10CQEACkwh7DycOl4OXMZhBRyhExnexF_OBiW3klOJeVMFMN__0TGaK9Ce5UOiPQvdFZGx1imp45DHpB751zM9pJLedSMm9J2vmmpAD50s_SVSCfE44hRnjKwwoIjejF4uZO_wOH66CgMzB4w0-z5ikcLST9eXbqJ_05erpU6RcPma29HJKRNOF916LuDVvlrpHcAlmw4C4rhsoKBYITpOlxuwHVxYWGOPxGbG-wa3ym2q-B2d5q" charset="UTF-8"></script><style>
+        :root {
+            --bg-color: #050505;
+            --text-color: #ffffff;
+            --card-bg: rgba(20, 20, 20, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent-color: #ffffff;
+            --muted-color: #888888;
+            --glow-color: rgba(255, 255, 255, 0.03);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f8f9fa;
+            --text-color: #111111;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --border-color: rgba(0, 0, 0, 0.1);
+            --accent-color: #000000;
+            --muted-color: #666666;
+            --glow-color: rgba(0, 0, 0, 0.02);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Sfondo con Linee Diagonali Spesse e Radi / Sparse */
+        .bg-diagonal-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: repeating-linear-gradient(
+                45deg,
+                var(--border-color),
+                var(--border-color) 6px,
+                transparent 6px,
+                transparent 200px
+            );
+            opacity: 0.45;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Effetto Luce Ambientale Sfumata */
+        .bg-glow {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Navbar */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-color);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            text-transform: lowercase;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .theme-toggle, .logout-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
+        }
+
+        .theme-toggle:hover, .logout-btn:hover {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+        }
+
+        /* Container principale */
+        .container {
+            flex: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+        }
+
+        /* Auth Screen */
+        .auth-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+        }
+
+        .auth-card {
+            background-color: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .auth-card h2 {
+            margin-bottom: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 6px;
+            color: var(--muted-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: var(--text-color);
+        }
+
+        .primary-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--text-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+        }
+
+        .primary-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .auth-switch {
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--muted-color);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* App Screen */
+        .app-screen {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .filter-select {
+            background: var(--card-bg);
+            backdrop-filter: blur(5px);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Central Photo & Input Section */
+        .action-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .photo-btn {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--text-color), var(--muted-color));
+            color: var(--bg-color);
+            border: none;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .photo-btn:hover {
+            transform: scale(1.06);
+            box-shadow: 0 20px 45px rgba(255,255,255,0.15);
+        }
+
+        .manual-input-container {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+        }
+
+        .manual-input-container input {
+            flex: 1;
+            padding: 14px 18px;
+            background: var(--card-bg);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .manual-input-container input:focus {
+            border-color: var(--text-color);
+        }
+
+        .manual-input-container button {
+            padding: 0 24px;
+            background: var(--text-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Loading Animation Screen (10 seconds) */
+        .loading-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 0;
+            text-align: center;
+            width: 100%;
+        }
+
+        .pulse-ring {
+            width: 90px;
+            height: 90px;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--text-color);
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            margin-bottom: 24px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+        }
+
+        .loading-subtext {
+            font-size: 14px;
+            color: var(--muted-color);
+        }
+
+        /* Results / Recipes Section */
+        .recipes-container {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .recipes-header {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .recipe-card {
+            background-color: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--text-color);
+        }
+
+        .recipe-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .recipe-info {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: var(--muted-color);
+        }
+
+        .recipe-steps {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+
+        .back-to-scan {
+            margin-top: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            align-self: center;
+            font-weight: 600;
+        }
+
+        .back-to-scan:hover {
+            border-color: var(--text-color);
+        }
+
+        #fileInput {
+            display: none;
+        }
+    
+        
+
+    </style>
+</head>
+<body data-theme="dark">
+
+
+
+
+    <!-- Design di Sfondo Geometrico e Luminoso -->
+    <div class="bg-diagonal-lines"></div>
+    <div class="bg-glow"></div>
+
+    <nav>
+        <div class="logo">eatit.</div>
+        <div class="nav-right" id="navRight" style="display: none;">
+            <button class="theme-toggle" onclick="toggleTheme()">Tema</button>
+            <button class="logout-btn" onclick="logout()">Esci</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- SEZIONE AUTENTICAZIONE -->
+        <div id="authScreen" class="auth-screen">
+            <div class="auth-card">
+                <h2 id="authTitle">Registrati</h2>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="authEmail" placeholder="iltuo@indirizzo.com">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="authPassword" placeholder="••••••••">
+                </div>
+                <button class="primary-btn" id="authSubmitBtn" onclick="handleAuth()">Crea Account</button>
+                <div class="auth-switch" onclick="toggleAuthMode()" id="authSwitchText">Hai già un account? Accedi</div>
+            </div>
+        </div>
+
+        <!-- SEZIONE PRINCIPALE DELL'APP -->
+        <div id="appScreen" class="app-screen">
+            <!-- Barra dei Filtri -->
+            <div class="filter-bar">
+                <select class="filter-select" id="filterDiet">
+                    <option value="">Dieta / Allergie</option>
+                    <option value="vegetariano">Vegetariano</option>
+                    <option value="vegano">Vegano</option>
+                    <option value="gluten-free">Senza Glutine</option>
+                    <option value="lactose-free">Senza Lattosio</option>
+                </select>
+                <select class="filter-select" id="filterType">
+                    <option value="">Tipo di Piatto</option>
+                    <option value="veloce">Veloce (< 15 min)</option>
+                    <option value="salutare">Salutare / Light</option>
+                    <option value="sfizioso">Sfizioso / Comfort</option>
+                </select>
+            </div>
+
+            <!-- Pulsante Foto Centrale e Input Manuale -->
+            <div class="action-section" id="actionSection">
+                <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="startAnalysisProcess()">
+                <button class="photo-btn" onclick="document.getElementById('fileInput').click()">FOTO</button>
+                
+                <div class="manual-input-container">
+                    <input type="text" id="manualIngredients" placeholder="O scrivi gli ingredienti (es. uova, pomodoro, pasta)...">
+                    <button onclick="startAnalysisProcessManual()">Cerca</button>
+                </div>
+            </div>
+
+            <!-- Animazione di Caricamento (10 secondi) -->
+            <div class="loading-screen" id="loadingScreen">
+                <div class="pulse-ring"></div>
+                <div class="loading-text" id="loadingText">Scansione del frigo in corso...</div>
+                <div class="loading-subtext">L'intelligenza artificiale sta analizzando gli ingredienti</div>
+            </div>
+
+            <!-- Risultati Ricette -->
+            <div class="recipes-container" id="recipesContainer">
+                <div class="recipes-header">3 Ricette Svuota-Frigo per te:</div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-title" id="r1Title">Frittata Veloce alle Erbe</div>
+                    <div class="recipe-info">
+                        <span>⏱ 10 min</span>
+                        <span>🔥 Facile</span>
+                        <span>🌿 Svuota-frigo</span>
+                    </div>
+                    <div class="recipe-steps" id="r1Desc">Sguscia le uova in una ciotola, sbattile con un pizzico di sale e pepe. Aggiungi le verdure o gli avanzi trovati nel frigo tagliati a cubetti sottili. Cuoci in padella antiaderente con un filo d'olio per 5 minuti per lato finché dorata.</div>
+                </div>
+
+                <div class="recipe-card">
+                    <div class="recipe-title" id="r2Title">Padellata Sprint di Verdure e Spezie</div>
+                    <div class="recipe-info">
+                        <span>⏱ 15 min</span>
+                        <span>🔥 Molto Facile</span>
+                        <span>🥗 Leggero</span>
+                    </div>
+                    <div class="recipe-steps" id="r2Desc">Taglia a listarelle tutte le verdure individuate. Saltale a fuoco vivo in padella con olio extravergine d'oliva, sale e le spezie che preferisci per mantenere la croccantezza. Servire caldo.</div>
+                </div>
+
+                <div class="recipe-card">
+                    <div class="recipe-title" id="r3Title">Saltimbocca Creativo del Giorno</div>
+                    <div class="recipe-info">
+                        <span>⏱ 12 min</span>
+                        <span>🔥 Intermedio</span>
+                        <span>✨ Sfizioso</span>
+                    </div>
+                    <div class="recipe-steps" id="r3Desc">Combina gli ingredienti proteici e i formaggi rilevati. Uniscili in padella creando un piatto caldo e saporito sfruttando al massimo le risorse rimaste nel frigorifero.</div>
+                </div>
+
+                <button class="back-to-scan" onclick="resetToScan()">Scatta un'altra foto o cambia ingredienti</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isLoginMode = false;
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('authTitle').innerText = isLoginMode ? 'Accedi' : 'Registrati';
+            document.getElementById('authSubmitBtn').innerText = isLoginMode ? 'Accedi' : 'Crea Account';
+            document.getElementById('authSwitchText').innerText = isLoginMode ? 'Non hai un account? Registrati' : 'Hai già un account? Accedi';
+        }
+
+        function handleAuth() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+
+            if(!email || !password) {
+                alert('Inserisci email e password validi.');
+                return;
+            }
+
+            if(!isLoginMode) {
+                localStorage.setItem('eatit_user', JSON.stringify({email, password}));
+                alert('Account registrato con successo!');
+            } else {
+                const saved = JSON.parse(localStorage.getItem('eatit_user'));
+                if(!saved || saved.email !== email || saved.password !== password) {
+                    alert('Credenziali non corrette o account non esistente. Registrati prima!');
+                    return;
+                }
+            }
+
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'flex';
+            document.getElementById('navRight').style.display = 'flex';
+        }
+
+        function logout() {
+            document.getElementById('appScreen').style.display = 'none';
+            document.getElementById('navRight').style.display = 'none';
+            document.getElementById('authScreen').style.display = 'flex';
+            resetToScan();
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        function startAnalysisProcess() {
+            const fileInput = document.getElementById('fileInput');
+            if(fileInput.files && fileInput.files[0]) {
+                runTimerAndShowRecipes("Analisi immagine frigo in corso...");
+            }
+        }
+
+        function startAnalysisProcessManual() {
+            const text = document.getElementById('manualIngredients').value;
+            if(!text.trim()) {
+                alert('Scrivi almeno un ingrediente o scatta una foto!');
+                return;
+            }
+            runTimerAndShowRecipes("Elaborazione ingredienti inseriti...");
+        }
+
+        function runTimerAndShowRecipes(statusText) {
+            document.getElementById('actionSection').style.display = 'none';
+            const loadingScreen = document.getElementById('loadingScreen');
+            const loadingText = document.getElementById('loadingText');
+            loadingText.innerText = statusText;
+            loadingScreen.style.display = 'flex';
+
+            setTimeout(() => { loadingText.innerText = "Riconoscimento oggetti e alimenti..."; }, 3000);
+            setTimeout(() => { loadingText.innerText = "Controllo filtri e preferenze..."; }, 6000);
+            setTimeout(() => { loadingText.innerText = "Creazione ricette personalizzate dall'IA..."; }, 8500);
+
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                document.getElementById('recipesContainer').style.display = 'flex';
+            }, 10000);
+        }
+
+        function resetToScan() {
+            document.getElementById('recipesContainer').style.display = 'none';
+            document.getElementById('actionSection').style.display = 'flex';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('manualIngredients').value = '';
+        }
+    </script>
+</body>
+</html>
