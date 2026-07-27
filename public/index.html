@@ -43,7 +43,6 @@
             overflow-x: hidden;
         }
 
-        /* Sfondo con Linee Diagonali Spesse e Radi / Sparse */
         .bg-diagonal-lines {
             position: fixed;
             top: 0;
@@ -62,7 +61,6 @@
             pointer-events: none;
         }
 
-        /* Effetto Luce Ambientale Sfumata */
         .bg-glow {
             position: fixed;
             top: 50%;
@@ -75,7 +73,6 @@
             pointer-events: none;
         }
 
-        /* Navbar */
         nav {
             display: flex;
             justify-content: space-between;
@@ -118,7 +115,6 @@
             color: var(--bg-color);
         }
 
-        /* Container principale */
         .container {
             flex: 1;
             max-width: 800px;
@@ -131,7 +127,6 @@
             z-index: 1;
         }
 
-        /* Auth Screen */
         .auth-screen {
             display: flex;
             flex-direction: column;
@@ -216,7 +211,6 @@
             text-decoration: underline;
         }
 
-        /* App Screen */
         .app-screen {
             display: none;
             width: 100%;
@@ -224,7 +218,6 @@
             align-items: center;
         }
 
-        /* Filter Bar */
         .filter-bar {
             display: flex;
             gap: 10px;
@@ -247,7 +240,6 @@
             cursor: pointer;
         }
 
-        /* Central Photo & Input Section */
         .action-section {
             display: flex;
             flex-direction: column;
@@ -313,7 +305,6 @@
             cursor: pointer;
         }
 
-        /* Loading Animation Screen (10 seconds) */
         .loading-screen {
             display: none;
             flex-direction: column;
@@ -351,7 +342,6 @@
             color: var(--muted-color);
         }
 
-        /* Results / Recipes Section */
         .recipes-container {
             display: none;
             width: 100%;
@@ -422,17 +412,10 @@
         #fileInput {
             display: none;
         }
-    
-        
-
     </style>
 </head>
 <body data-theme="dark">
 
-
-
-
-    <!-- Design di Sfondo Geometrico e Luminoso -->
     <div class="bg-diagonal-lines"></div>
     <div class="bg-glow"></div>
 
@@ -464,7 +447,6 @@
 
         <!-- SEZIONE PRINCIPALE DELL'APP -->
         <div id="appScreen" class="app-screen">
-            <!-- Barra dei Filtri -->
             <div class="filter-bar">
                 <select class="filter-select" id="filterDiet">
                     <option value="">Dieta / Allergie</option>
@@ -481,7 +463,6 @@
                 </select>
             </div>
 
-            <!-- Pulsante Foto Centrale e Input Manuale -->
             <div class="action-section" id="actionSection">
                 <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="startAnalysisProcess()">
                 <button class="photo-btn" onclick="document.getElementById('fileInput').click()">FOTO</button>
@@ -492,7 +473,7 @@
                 </div>
             </div>
 
-            <!-- Animazione di Caricamento (10 secondi) -->
+            <!-- Animazione di Caricamento -->
             <div class="loading-screen" id="loadingScreen">
                 <div class="pulse-ring"></div>
                 <div class="loading-text" id="loadingText">Scansione del frigo in corso...</div>
@@ -602,21 +583,43 @@
             runTimerAndShowRecipes("Elaborazione ingredienti inseriti...");
         }
 
-        function runTimerAndShowRecipes(statusText) {
+        async function runTimerAndShowRecipes(statusText) {
             document.getElementById('actionSection').style.display = 'none';
             const loadingScreen = document.getElementById('loadingScreen');
             const loadingText = document.getElementById('loadingText');
             loadingText.innerText = statusText;
             loadingScreen.style.display = 'flex';
 
-            setTimeout(() => { loadingText.innerText = "Riconoscimento oggetti e alimenti..."; }, 3000);
-            setTimeout(() => { loadingText.innerText = "Controllo filtri e preferenze..."; }, 6000);
-            setTimeout(() => { loadingText.innerText = "Creazione ricette personalizzate dall'IA..."; }, 8500);
+            try {
+                // Chiamata vera al server (Vercel) che interroga OpenAI
+                const response = await fetch('/api/get-recipes');
+                const data = await response.json();
 
-            setTimeout(() => {
+                const recipes = data.recipes || [];
+
+                if (recipes.length > 0) {
+                    if(recipes[0]) {
+                        document.getElementById('r1Title').innerText = recipes[0].title;
+                        document.getElementById('r1Desc').innerText = recipes[0].instructions;
+                    }
+                    if(recipes[1]) {
+                        document.getElementById('r2Title').innerText = recipes[1].title;
+                        document.getElementById('r2Desc').innerText = recipes[1].instructions;
+                    }
+                    if(recipes[2]) {
+                        document.getElementById('r3Title').innerText = recipes[3]?.title || recipes[2].title;
+                        document.getElementById('r3Desc').innerText = recipes[2].instructions;
+                    }
+                }
+
                 loadingScreen.style.display = 'none';
                 document.getElementById('recipesContainer').style.display = 'flex';
-            }, 10000);
+            } catch (error) {
+                console.error("Errore nel recupero delle ricette:", error);
+                loadingScreen.style.display = 'none';
+                alert("C'è stato un problema nel generare le ricette con l'IA. Riprova!");
+                resetToScan();
+            }
         }
 
         function resetToScan() {
