@@ -1,8 +1,5 @@
-import { GoogleGenAI } from '@google/genai';
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 export default async function handler(req, res) {
+    // Intestazioni CORS
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -22,21 +19,39 @@ export default async function handler(req, res) {
 
     try {
         const userIngredients = req.body && req.body.ingredients ? req.body.ingredients : "frigo generico";
+        const apiKey = process.env.GEMINI_API_KEY;
+
+        if (!apiKey) {
+            throw new Error("Chiave API mancante (GEMINI_API_KEY)");
+        }
 
         const prompt = `Sei uno chef professionista di cucina creativa e svuota-frigo. Genera esattamente 3 ricette originali e appetitose in lingua italiana basate su questi ingredienti: "${userIngredients}". 
         Rispondi ESCLUSIVAMENTE in formato JSON valido, strutturato con una chiave principale "recipes" che contiene un array di 3 oggetti. Ciascun oggetto deve avere esattamente queste chiavi: "title" (stringa), "time" (stringa, es. '15 min'), "difficulty" (stringa, es. 'Facile'), e "instructions" (stringa con i passaggi dettagliati). Non aggiungere altro testo fuori dal JSON.`;
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                responseMimeType: 'application/json'
-            }
+        // Chiamata diretta all'API di Gemini senza librerie esterne
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { responseMimeType: "application/json" }
+            })
         });
 
-        const rawContent = response.text;
+        if (!response.ok) {
+            const errData = await response.text();
+            throw new Error(`Errore Server Gemini: ${errData}`);
+        }
+
+        const data = await response.json();
+        const rawContent = data.candidates[0].content.parts[0].text;
         const parsedData = JSON.parse(rawContent);
         
+        // Estrazione array ricette
         let recipesArray = [];
         if (Array.isArray(parsedData)) {
             recipesArray = parsedData;
