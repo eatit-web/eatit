@@ -1,6 +1,11 @@
 {
-  "name": "eatit-site",
+  "name": "eatit",
   "version": "1.0.0",
+  "description": "Svuota Frigo Intelligente",
+  "main": "api/get-recipes.js",
+  "scripts": {
+    "start": "node api/get-recipes.js"
+  },
   "dependencies": {
     "openai": "^4.20.0"
   }
