@@ -1,48 +1,59 @@
+import { GoogleGenAI } from '@google/genai';
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
 export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Metodo non consentito' });
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    );
+
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
     }
 
-    const { ingredients } = req.body;
-
-    if (!ingredients) {
-        return res.status(400).json({ error: 'Nessun ingrediente fornito' });
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed. Use POST.' });
     }
 
     try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: 'gpt-4o-mini',
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'Sei uno chef esperto di cucina svuota-frigo. Restituisci esattamente 3 ricette basate sugli ingredienti forniti dall\'utente. Fornisci la risposta in formato JSON con una chiave "recipes" che contiene un array di 3 oggetti. Ogni oggetto deve avere: title, time, difficulty, description.'
-                    },
-                    {
-                        role: 'user',
-                        content: `Ecco gli ingredienti disponibili: ${ingredients}`
-                    }
-                ],
-                response_format: { type: "json_object" }
-            })
+        const userIngredients = req.body && req.body.ingredients ? req.body.ingredients : "frigo generico";
+
+        const prompt = `Sei uno chef professionista di cucina creativa e svuota-frigo. Genera esattamente 3 ricette originali e appetitose in lingua italiana basate su questi ingredienti: "${userIngredients}". 
+        Rispondi ESCLUSIVAMENTE in formato JSON valido, strutturato con una chiave principale "recipes" che contiene un array di 3 oggetti. Ciascun oggetto deve avere esattamente queste chiavi: "title" (stringa), "time" (stringa, es. '15 min'), "difficulty" (stringa, es. 'Facile'), e "instructions" (stringa con i passaggi dettagliati). Non aggiungere altro testo fuori dal JSON.`;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+                responseMimeType: 'application/json'
+            }
         });
 
-        const data = await response.json();
+        const rawContent = response.text;
+        const parsedData = JSON.parse(rawContent);
         
-        if (!data.choices || !data.choices[0]) {
-            throw new Error('Risposta non valida da OpenAI');
+        let recipesArray = [];
+        if (Array.isArray(parsedData)) {
+            recipesArray = parsedData;
+        } else if (parsedData.recipes && Array.isArray(parsedData.recipes)) {
+            recipesArray = parsedData.recipes;
+        } else {
+            const foundKey = Object.keys(parsedData).find(k => Array.isArray(parsedData[k]));
+            recipesArray = foundKey ? parsedData[foundKey] : [];
         }
 
-        const recipes = JSON.parse(data.choices[0].message.content);
+        return res.status(200).json({ recipes: recipesArray });
 
-        return res.status(200).json(recipes);
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Errore durante la generazione delle ricette' });
+        console.error("Errore critico con Gemini:", error);
+        return res.status(500).json({ 
+            error: "Errore interno durante la generazione delle ricette.",
+            details: error.message 
+        });
     }
 }
