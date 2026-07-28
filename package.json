@@ -1,12 +1,9 @@
 {
   "name": "eatit",
-  "version": 1.0,
-  "description": "Svuota Frigo Intelligente con Gemini",
+  "version": "1.0.0",
+  "description": "Svuota Frigo Intelligente",
   "main": "api/get-recipes.js",
-  "scripts": {
-    "start": "node api/get-recipes.js"
-  },
   "dependencies": {
-    "@google/genai": "^0.1.1"
+    "@google/genai": "latest"
   }
 }
