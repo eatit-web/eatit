@@ -10,7 +10,6 @@
             --text-color: #ffffff;
             --card-bg: rgba(20, 20, 20, 0.7);
             --border-color: rgba(255, 255, 255, 0.1);
-            --accent-color: #ffffff;
             --muted-color: #888888;
             --glow-color: rgba(255, 255, 255, 0.03);
         }
@@ -20,7 +19,6 @@
             --text-color: #111111;
             --card-bg: rgba(255, 255, 255, 0.8);
             --border-color: rgba(0, 0, 0, 0.1);
-            --accent-color: #000000;
             --muted-color: #666666;
             --glow-color: rgba(0, 0, 0, 0.02);
         }
@@ -30,7 +28,7 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            transition: background 0.3s, color 0.3s;
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
 
         body {
@@ -95,7 +93,7 @@
 
         .nav-right {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             align-items: center;
         }
 
@@ -107,7 +105,6 @@
             border-radius: 20px;
             cursor: pointer;
             font-size: 14px;
-            backdrop-filter: blur(5px);
         }
 
         .theme-toggle:hover, .logout-btn:hover {
@@ -127,6 +124,7 @@
             z-index: 1;
         }
 
+        /* Schermata Autenticazione */
         .auth-screen {
             display: flex;
             flex-direction: column;
@@ -152,7 +150,6 @@
         .auth-card h2 {
             margin-bottom: 24px;
             font-weight: 700;
-            letter-spacing: -0.5px;
         }
 
         .input-group {
@@ -166,7 +163,6 @@
             margin-bottom: 6px;
             color: var(--muted-color);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .input-group input {
@@ -180,10 +176,6 @@
             outline: none;
         }
 
-        .input-group input:focus {
-            border-color: var(--text-color);
-        }
-
         .primary-btn {
             width: 100%;
             padding: 12px;
@@ -195,12 +187,10 @@
             font-size: 16px;
             cursor: pointer;
             margin-top: 10px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.2);
         }
 
         .primary-btn:hover {
             opacity: 0.9;
-            transform: translateY(-1px);
         }
 
         .auth-switch {
@@ -211,33 +201,12 @@
             text-decoration: underline;
         }
 
+        /* Schermata Applicazione Principale */
         .app-screen {
             display: none;
             width: 100%;
             flex-direction: column;
             align-items: center;
-        }
-
-        .filter-bar {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-            overflow-x: auto;
-            padding-bottom: 10px;
-            margin-bottom: 30px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .filter-select {
-            background: var(--card-bg);
-            backdrop-filter: blur(5px);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 14px;
-            outline: none;
-            cursor: pointer;
         }
 
         .action-section {
@@ -263,14 +232,12 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            transition: transform 0.3s, box-shadow 0.3s;
             text-transform: uppercase;
             letter-spacing: 1.5px;
         }
 
         .photo-btn:hover {
-            transform: scale(1.06);
-            box-shadow: 0 20px 45px rgba(255,255,255,0.15);
+            transform: scale(1.05);
         }
 
         .manual-input-container {
@@ -283,16 +250,11 @@
             flex: 1;
             padding: 14px 18px;
             background: var(--card-bg);
-            backdrop-filter: blur(5px);
             border: 1px solid var(--border-color);
             color: var(--text-color);
             border-radius: 10px;
             font-size: 15px;
             outline: none;
-        }
-
-        .manual-input-container input:focus {
-            border-color: var(--text-color);
         }
 
         .manual-input-container button {
@@ -305,6 +267,7 @@
             cursor: pointer;
         }
 
+        /* Schermata di Caricamento */
         .loading-screen {
             display: none;
             flex-direction: column;
@@ -321,7 +284,7 @@
             border: 3px solid var(--border-color);
             border-top: 3px solid var(--text-color);
             border-radius: 50%;
-            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            animation: spin 1s linear infinite;
             margin-bottom: 24px;
         }
 
@@ -333,15 +296,9 @@
         .loading-text {
             font-size: 18px;
             font-weight: 600;
-            margin-bottom: 8px;
-            letter-spacing: -0.3px;
         }
 
-        .loading-subtext {
-            font-size: 14px;
-            color: var(--muted-color);
-        }
-
+        /* Risultati */
         .recipes-container {
             display: none;
             width: 100%;
@@ -352,13 +309,11 @@
         .recipes-header {
             font-size: 20px;
             font-weight: 700;
-            margin-bottom: 10px;
-            letter-spacing: -0.5px;
+            margin-bottom: 5px;
         }
 
         .recipe-card {
             background-color: var(--card-bg);
-            backdrop-filter: blur(10px);
             border: 1px solid var(--border-color);
             border-radius: 14px;
             padding: 24px;
@@ -366,12 +321,6 @@
             flex-direction: column;
             gap: 12px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: transform 0.2s, border-color 0.2s;
-        }
-
-        .recipe-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--text-color);
         }
 
         .recipe-title {
@@ -389,8 +338,8 @@
         .recipe-steps {
             font-size: 14px;
             line-height: 1.5;
-            color: var(--text-color);
             opacity: 0.9;
+            white-space: pre-line;
         }
 
         .back-to-scan {
@@ -409,9 +358,7 @@
             border-color: var(--text-color);
         }
 
-        #fileInput {
-            display: none;
-        }
+        #fileInput { display: none; }
     </style>
 </head>
 <body data-theme="dark">
@@ -428,7 +375,7 @@
     </nav>
 
     <div class="container">
-        <!-- SEZIONE AUTENTICAZIONE -->
+        <!-- SEZIONE LOGIN / REGISTRAZIONE -->
         <div id="authScreen" class="auth-screen">
             <div class="auth-card">
                 <h2 id="authTitle">Registrati</h2>
@@ -447,47 +394,27 @@
 
         <!-- SEZIONE PRINCIPALE DELL'APP -->
         <div id="appScreen" class="app-screen">
-            <div class="filter-bar">
-                <select class="filter-select" id="filterDiet">
-                    <option value="">Dieta / Allergie</option>
-                    <option value="vegetariano">Vegetariano</option>
-                    <option value="vegano">Vegano</option>
-                    <option value="gluten-free">Senza Glutine</option>
-                    <option value="lactose-free">Senza Lattosio</option>
-                </select>
-                <select class="filter-select" id="filterType">
-                    <option value="">Tipo di Piatto</option>
-                    <option value="veloce">Veloce (< 15 min)</option>
-                    <option value="salutare">Salutare / Light</option>
-                    <option value="sfizioso">Sfizioso / Comfort</option>
-                </select>
-            </div>
-
             <div class="action-section" id="actionSection">
                 <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="startAnalysisProcess()">
                 <button class="photo-btn" onclick="document.getElementById('fileInput').click()">FOTO</button>
                 
                 <div class="manual-input-container">
-                    <input type="text" id="manualIngredients" placeholder="O scrivi gli ingredienti (es. uova, pomodoro, pasta)...">
+                    <input type="text" id="manualIngredients" placeholder="Scrivi ingredienti (es. uova, zucchine, riso)...">
                     <button onclick="startAnalysisProcessManual()">Cerca</button>
                 </div>
             </div>
 
-            <!-- Animazione di Caricamento -->
+            <!-- CARICAMENTO -->
             <div class="loading-screen" id="loadingScreen">
                 <div class="pulse-ring"></div>
-                <div class="loading-text" id="loadingText">Scansione del frigo in corso...</div>
-                <div class="loading-subtext">L'intelligenza artificiale sta analizzando gli ingredienti</div>
+                <div class="loading-text" id="loadingText">L'IA sta creando le ricette per te...</div>
             </div>
 
-            <!-- Risultati Ricette Dinamici -->
+            <!-- RISULTATI DINAMICI -->
             <div class="recipes-container" id="recipesContainer">
                 <div class="recipes-header">Ricette Svuota-Frigo generate dall'IA:</div>
-                
-                <!-- Il contenitore in cui verranno inserite dinamicamente le ricette -->
                 <div id="dynamicRecipesList" style="display: flex; flex-direction: column; gap: 20px; width: 100%;"></div>
-
-                <button class="back-to-scan" onclick="resetToScan()">Scatta un'altra foto o cambia ingredienti</button>
+                <button class="back-to-scan" onclick="resetToScan()">Nuova Ricerca</button>
             </div>
         </div>
     </div>
@@ -503,25 +430,20 @@
         }
 
         function handleAuth() {
-            const email = document.getElementById('authEmail').value;
-            const password = document.getElementById('authPassword').value;
-
-            if(!email || !password) {
-                alert('Inserisci email e password validi.');
-                return;
-            }
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value.trim();
+            if(!email || !password) { alert('Inserisci email e password.'); return; }
 
             if(!isLoginMode) {
                 localStorage.setItem('eatit_user', JSON.stringify({email, password}));
-                alert('Account registrato con successo!');
+                alert('Account creato con successo!');
             } else {
                 const saved = JSON.parse(localStorage.getItem('eatit_user'));
                 if(!saved || saved.email !== email || saved.password !== password) {
-                    alert('Credenziali non corrette o account non esistente. Registrati prima!');
+                    alert('Credenziali non valide o account inesistente.');
                     return;
                 }
             }
-
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('appScreen').style.display = 'flex';
             document.getElementById('navRight').style.display = 'flex';
@@ -536,47 +458,37 @@
 
         function toggleTheme() {
             const body = document.body;
-            const currentTheme = body.getAttribute('data-theme');
-            body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+            body.setAttribute('data-theme', body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
         }
 
         function startAnalysisProcess() {
-            const fileInput = document.getElementById('fileInput');
-            if(fileInput.files && fileInput.files[0]) {
-                runTimerAndShowRecipes("Analisi immagine frigo in corso...");
+            if(document.getElementById('fileInput').files[0]) {
+                fetchRecipes("Foto frigo del contenuto");
             }
         }
 
         function startAnalysisProcessManual() {
-            const text = document.getElementById('manualIngredients').value;
-            if(!text.trim()) {
-                alert('Scrivi almeno un ingrediente o scatta una foto!');
-                return;
-            }
-            runTimerAndShowRecipes("Elaborazione ingredienti inseriti...");
+            const text = document.getElementById('manualIngredients').value.trim();
+            if(!text) { alert('Inserisci almeno un ingrediente.'); return; }
+            fetchRecipes(text);
         }
 
-        async function runTimerAndShowRecipes(statusText) {
+        async function fetchRecipes(queryText) {
             document.getElementById('actionSection').style.display = 'none';
-            const loadingScreen = document.getElementById('loadingScreen');
-            const loadingText = document.getElementById('loadingText');
-            loadingText.innerText = statusText;
-            loadingScreen.style.display = 'flex';
-
-            const ingredientsText = document.getElementById('manualIngredients').value || "frigo generico";
+            document.getElementById('loadingScreen').style.display = 'flex';
 
             try {
                 const response = await fetch('/api/get-recipes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ingredients: ingredientsText })
+                    body: JSON.stringify({ ingredients: queryText })
                 });
 
                 const data = await response.json();
                 const recipes = data.recipes || [];
 
                 const container = document.getElementById('dynamicRecipesList');
-                container.innerHTML = ''; // Pulisce eventuali vecchi risultati
+                container.innerHTML = '';
 
                 if (recipes.length > 0) {
                     recipes.forEach(recipe => {
@@ -588,20 +500,20 @@
                                 <span>⏱ ${recipe.time || '15 min'}</span>
                                 <span>🔥 ${recipe.difficulty || 'Facile'}</span>
                             </div>
-                            <div class="recipe-steps">${recipe.instructions || recipe.description || ''}</div>
+                            <div class="recipe-steps">${recipe.instructions || 'Nessuna istruzione disponibile.'}</div>
                         `;
                         container.appendChild(card);
                     });
                 } else {
-                    container.innerHTML = '<div class="recipe-card"><div class="recipe-title">Nessuna ricetta trovata</div><div class="recipe-steps">L\'intelligenza artificiale non ha restituito ricette. Riprova.</div></div>';
+                    container.innerHTML = '<div class="recipe-card"><div class="recipe-title">Nessuna ricetta trovata</div><div class="recipe-steps">L\'intelligenza artificiale non ha restituito ricette per questi ingredienti. Riprova.</div></div>';
                 }
 
-                loadingScreen.style.display = 'none';
+                document.getElementById('loadingScreen').style.display = 'none';
                 document.getElementById('recipesContainer').style.display = 'flex';
-            } catch (error) {
-                console.error("Errore nel recupero delle ricette:", error);
-                loadingScreen.style.display = 'none';
-                alert("C'è stato un problema nel generare le ricette con l'IA. Riprova!");
+            } catch (err) {
+                console.error("Errore fetch ricette:", err);
+                document.getElementById('loadingScreen').style.display = 'none';
+                alert('Errore di comunicazione con il server.');
                 resetToScan();
             }
         }
