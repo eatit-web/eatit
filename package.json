@@ -1,7 +1,7 @@
 {
   "name": "eatit",
   "version": "1.0.0",
-  "description": "Svuota Frigo Intelligente",
+  "description": "Svuota Frigo Intelligente con IA",
   "main": "api/get-recipes.js",
   "scripts": {
     "start": "node api/get-recipes.js"
