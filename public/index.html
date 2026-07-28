@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eatit - Svuota Frigo Intelligente</title>
-    <script type="text/javascript" src="https://gc.kes.v2.scr.kaspersky-labs.com/7EA5E9BB-55E1-4C31-9C21-4943DDFED2E4/main.js?attr=cuv_00juKJ7lNPm8SVF7ijxzZeep1FL5_E3Yx68xZrqAVox11Nbn8bEp_Tn8de-remuAnXWpLwmL10CQEACkwh7DycOl4OXMZhBRyhExnexF_OBiW3klOJeVMFMN__0TGaK9Ce5UOiPQvdFZGx1imp45DHpB751zM9pJLedSMm9J2vmmpAD50s_SVSCfE44hRnjKwwoIjejF4uZO_wOH66CgMzB4w0-z5ikcLST9eXbqJ_05erpU6RcPma29HJKRNOF916LuDVvlrpHcAlmw4C4rhsoKBYITpOlxuwHVxYWGOPxGbG-wa3ym2q-B2d5q" charset="UTF-8"></script><style>
+    <style>
         :root {
             --bg-color: #050505;
             --text-color: #ffffff;
@@ -480,39 +480,12 @@
                 <div class="loading-subtext">L'intelligenza artificiale sta analizzando gli ingredienti</div>
             </div>
 
-            <!-- Risultati Ricette -->
+            <!-- Risultati Ricette Dinamici -->
             <div class="recipes-container" id="recipesContainer">
-                <div class="recipes-header">3 Ricette Svuota-Frigo per te:</div>
+                <div class="recipes-header">Ricette Svuota-Frigo generate dall'IA:</div>
                 
-                <div class="recipe-card">
-                    <div class="recipe-title" id="r1Title">Frittata Veloce alle Erbe</div>
-                    <div class="recipe-info">
-                        <span>⏱ 10 min</span>
-                        <span>🔥 Facile</span>
-                        <span>🌿 Svuota-frigo</span>
-                    </div>
-                    <div class="recipe-steps" id="r1Desc">Sguscia le uova in una ciotola, sbattile con un pizzico di sale e pepe. Aggiungi le verdure o gli avanzi trovati nel frigo tagliati a cubetti sottili. Cuoci in padella antiaderente con un filo d'olio per 5 minuti per lato finché dorata.</div>
-                </div>
-
-                <div class="recipe-card">
-                    <div class="recipe-title" id="r2Title">Padellata Sprint di Verdure e Spezie</div>
-                    <div class="recipe-info">
-                        <span>⏱ 15 min</span>
-                        <span>🔥 Molto Facile</span>
-                        <span>🥗 Leggero</span>
-                    </div>
-                    <div class="recipe-steps" id="r2Desc">Taglia a listarelle tutte le verdure individuate. Saltale a fuoco vivo in padella con olio extravergine d'oliva, sale e le spezie che preferisci per mantenere la croccantezza. Servire caldo.</div>
-                </div>
-
-                <div class="recipe-card">
-                    <div class="recipe-title" id="r3Title">Saltimbocca Creativo del Giorno</div>
-                    <div class="recipe-info">
-                        <span>⏱ 12 min</span>
-                        <span>🔥 Intermedio</span>
-                        <span>✨ Sfizioso</span>
-                    </div>
-                    <div class="recipe-steps" id="r3Desc">Combina gli ingredienti proteici e i formaggi rilevati. Uniscili in padella creando un piatto caldo e saporito sfruttando al massimo le risorse rimaste nel frigorifero.</div>
-                </div>
+                <!-- Il contenitore in cui verranno inserite dinamicamente le ricette -->
+                <div id="dynamicRecipesList" style="display: flex; flex-direction: column; gap: 20px; width: 100%;"></div>
 
                 <button class="back-to-scan" onclick="resetToScan()">Scatta un'altra foto o cambia ingredienti</button>
             </div>
@@ -590,26 +563,37 @@
             loadingText.innerText = statusText;
             loadingScreen.style.display = 'flex';
 
-            try {
-                // Chiamata vera al server (Vercel) che interroga OpenAI
-                const response = await fetch('/api/get-recipes');
-                const data = await response.json();
+            const ingredientsText = document.getElementById('manualIngredients').value || "frigo generico";
 
+            try {
+                const response = await fetch('/api/get-recipes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ingredients: ingredientsText })
+                });
+
+                const data = await response.json();
                 const recipes = data.recipes || [];
 
+                const container = document.getElementById('dynamicRecipesList');
+                container.innerHTML = ''; // Pulisce eventuali vecchi risultati
+
                 if (recipes.length > 0) {
-                    if(recipes[0]) {
-                        document.getElementById('r1Title').innerText = recipes[0].title;
-                        document.getElementById('r1Desc').innerText = recipes[0].instructions;
-                    }
-                    if(recipes[1]) {
-                        document.getElementById('r2Title').innerText = recipes[1].title;
-                        document.getElementById('r2Desc').innerText = recipes[1].instructions;
-                    }
-                    if(recipes[2]) {
-                        document.getElementById('r3Title').innerText = recipes[3]?.title || recipes[2].title;
-                        document.getElementById('r3Desc').innerText = recipes[2].instructions;
-                    }
+                    recipes.forEach(recipe => {
+                        const card = document.createElement('div');
+                        card.className = 'recipe-card';
+                        card.innerHTML = `
+                            <div class="recipe-title">${recipe.title || 'Ricetta Svuota-Frigo'}</div>
+                            <div class="recipe-info">
+                                <span>⏱ ${recipe.time || '15 min'}</span>
+                                <span>🔥 ${recipe.difficulty || 'Facile'}</span>
+                            </div>
+                            <div class="recipe-steps">${recipe.instructions || recipe.description || ''}</div>
+                        `;
+                        container.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = '<div class="recipe-card"><div class="recipe-title">Nessuna ricetta trovata</div><div class="recipe-steps">L\'intelligenza artificiale non ha restituito ricette. Riprova.</div></div>';
                 }
 
                 loadingScreen.style.display = 'none';
