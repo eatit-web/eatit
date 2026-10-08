@@ -34,8 +34,8 @@ Ogni oggetto deve contenere:
 
 Non aggiungere altro testo, nessun blocco markdown prima o dopo, solo il JSON puro.`;
 
-        // Modello aggiornato a gemini-2.0-flash
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey.trim()}`;
+        // Modello aggiornato a gemini-3.8-flash come richiesto da Google
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey.trim()}`;
         
         const response = await fetch(url, {
             method: 'POST',
