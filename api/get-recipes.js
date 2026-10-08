@@ -27,7 +27,8 @@ export default async function handler(req, res) {
         const prompt = `Sei uno chef professionista di cucina creativa e svuota-frigo. Genera esattamente 3 ricette originali e appetitose in lingua italiana basate su questi ingredienti: "${userIngredients}". 
         Rispondi ESCLUSIVAMENTE in formato JSON valido, strutturato con una chiave principale "recipes" che contiene un array di 3 oggetti. Ciascun oggetto deve avere esattamente queste chiavi: "title" (stringa), "time" (stringa, es. '15 min'), "difficulty" (stringa, es. 'Facile'), e "instructions" (stringa con i passaggi dettagliati). Non aggiungere altro testo fuori dal JSON.`;
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        // Chiamata diretta all'API di Gemini usando il modello stabile gemini-1.5-flash
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
         
         const response = await fetch(url, {
             method: 'POST',
