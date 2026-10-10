@@ -24,17 +24,23 @@ export default async function handler(req, res) {
             throw new Error("Chiave API mancante (GEMINI_API_KEY)");
         }
 
-        const prompt = `Sei uno chef professionista di cucina creativa. Genera esattamente 3 ricette originali in italiano basate su questi ingredienti: "${userIngredients}".
-Rispondi ESCLUSIVAMENTE con un oggetto JSON valido contenente una chiave "recipes" che ha come valore un array di 3 oggetti.
+        // Prompt ottimizzato per ricette veloci e svuota-frigo pratiche
+        const prompt = `Sei un assistente di cucina veloce e pratico per chi deve svuotare il frigo.
+Genera esattamente 3 ricette veloci, semplici e gustose in italiano usando principalmente questi ingredienti: "${userIngredients}".
+
+REGOLE FONDAMENTALI:
+1. Le ricette devono essere VELOCI (tempo totale massimo 15-20 minuti) e facilissime da preparare.
+2. Evita procedimenti lunghi, cotture al forno complesse o tecniche elaborate.
+3. Rispondi ESCLUSIVAMENTE con un oggetto JSON valido contenente una chiave "recipes" che ha come valore un array di 3 oggetti.
+
 Ogni oggetto deve contenere:
-- "title": il nome della ricetta
-- "time": tempo di preparazione (es. "20 min")
-- "difficulty": difficoltà (es. "Facile")
-- "instructions": procedimento passo passo
+- "title": il nome accattivante della ricetta
+- "time": tempo di preparazione espresso (es. "10 min", "15 min")
+- "difficulty": deve essere "Facile" o "Molto facile"
+- "instructions": procedimento passo passo chiaro e sintetico
 
 Non aggiungere altro testo, nessun blocco markdown prima o dopo, solo il JSON puro.`;
 
-        // Modello aggiornato a gemini-3.8-flash come richiesto da Google
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey.trim()}`;
         
         const response = await fetch(url, {
@@ -63,7 +69,6 @@ Non aggiungere altro testo, nessun blocco markdown prima o dopo, solo il JSON pu
         const data = JSON.parse(responseText);
         let rawContent = data.candidates[0].content.parts[0].text;
         
-        // Pulizia da eventuali tag markdown ```json
         rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
         
         const parsedData = JSON.parse(rawContent);
