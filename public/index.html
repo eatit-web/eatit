@@ -62,7 +62,7 @@
         }
 
         .glass-panel {
-            background: rgba(18, 18, 22, 0.8);
+            background: rgba(18, 18, 22, 0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.12);
@@ -94,7 +94,6 @@
             backdrop-filter: blur(10px);
         }
 
-        /* SFONDO ANIMATO 2D/3D STYLE */
         #bg-canvas {
             position: fixed;
             top: 0;
@@ -105,40 +104,37 @@
             pointer-events: none;
         }
 
-        /* OMINO STILE NEW YORK DI 2D IN BASSO A DESTRA */
         #ny-guy {
             position: fixed;
-            bottom: 10px;
+            bottom: 15px;
             right: 15px;
             z-index: 5;
             pointer-events: none;
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: transform 0.3s ease;
         }
 
         .guy-body {
-            font-size: 45px;
+            font-size: 42px;
             filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8));
             animation: chew 0.6s infinite alternate;
         }
 
         @keyframes chew {
-            0% { transform: translateY(0) scale(1); }
-            100% { transform: translateY(-3px) scale(1.02); }
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-4px); }
         }
 
-        /* CARTA GETTATA A TERRA */
         .litter-paper {
             position: fixed;
-            bottom: 5px;
+            bottom: 10px;
             right: 80px;
             font-size: 18px;
             z-index: 4;
             pointer-events: none;
             opacity: 0.8;
-            transform: rotate(25deg);
+            transform: rotate(20deg);
         }
 
         .touch-scroll {
@@ -167,17 +163,17 @@
 
 <body class="h-full bg-black text-white flex flex-col justify-between selection:bg-orange-500 selection:text-black pb-safe">
 
-    <!-- SFONDO DINAMICO ICONE CIBO -->
+    <!-- CANVAS SFONDO DINAMICO -->
     <canvas id="bg-canvas"></canvas>
 
-    <!-- OMINO NEW YORKER ANIMATO -->
+    <!-- OMINO NEW YORKER URBAN -->
     <div id="ny-guy">
         <div class="guy-body" id="guy-avatar">🧢🧥🍔</div>
     </div>
     <div id="litter-container"></div>
 
     <!-- INTRO SPLASH SCREEN -->
-    <div id="intro-splash" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-2xl transition-opacity duration-700 ease-in-out px-6">
+    <div id="intro-splash" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-2xl transition-opacity duration-500 ease-in-out px-6">
         <div class="text-center w-full max-w-sm z-10 flex flex-col items-center">
             
             <div class="relative w-28 h-28 mb-8 flex items-center justify-center">
@@ -192,10 +188,10 @@
             </div>
             
             <p class="text-zinc-400 text-sm mb-9 font-medium leading-relaxed max-w-xs">
-                Master Chef Cookbook AI: ricette su misura con stile urban.
+                Master Chef AI: immetti o fotografa gli ingredienti e crea piatti d'autore.
             </p>
 
-            <button id="start-btn" onclick="closeIntro()" class="w-full py-4 text-base font-black text-black bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 rounded-2xl shadow-xl shadow-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-3">
+            <button id="start-btn" onclick="closeIntro()" class="w-full py-4 text-base font-black text-black bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 rounded-2xl shadow-xl shadow-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer">
                 <span>APRI IL FRIGO</span>
                 <i class="fa-solid fa-arrow-right text-sm"></i>
             </button>
@@ -203,7 +199,7 @@
     </div>
 
     <!-- MAIN APP CONTAINER -->
-    <div id="main-app" class="relative z-10 flex-1 flex flex-col min-h-screen opacity-0 transition-opacity duration-500">
+    <div id="main-app" class="relative z-10 flex-1 flex flex-col min-h-screen">
         
         <!-- HEADER -->
         <header class="w-full max-w-2xl mx-auto px-4 pt-5 pb-3 flex items-center justify-between">
@@ -370,13 +366,31 @@
             return lower.length > 1;
         }
 
+        /* FUNZIONE CHIUSURA INTRO RISOLTA */
+        function closeIntro() {
+            playTone(523.25);
+            const splash = document.getElementById('intro-splash');
+            if (splash) {
+                splash.style.opacity = '0';
+                splash.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                }, 400);
+            }
+        }
+
         /* ANIMAZIONE CANVAS 2D/3D (CIBO CHE VIENE VERSO DI TE) */
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas ? canvas.getContext('2d') : null;
         let foodParticles = [];
 
         function initCanvas() {
+            const canvas = document.getElementById('bg-canvas');
             if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
 
@@ -386,80 +400,65 @@
             foodParticles = [];
             for (let i = 0; i < count; i++) {
                 foodParticles.push({
-                    x: (Math.random() - 0.5) * canvas.width,
-                    y: (Math.random() - 0.5) * canvas.height,
+                    x: (Math.random() - 0.5) * window.innerWidth,
+                    y: (Math.random() - 0.5) * window.innerHeight,
                     z: Math.random() * 1000,
                     symbol: symbols[Math.floor(Math.random() * symbols.length)],
-                    size: 15 + Math.random() * 30,
+                    size: 15 + Math.random() * 25,
                     speed: 1.5 + Math.random() * 2
                 });
+            }
+
+            function animateCanvas() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const cx = canvas.width / 2;
+                const cy = canvas.height / 2;
+
+                foodParticles.forEach(p => {
+                    p.z -= p.speed;
+                    if (p.z <= 0) p.z = 1000;
+
+                    const k = 400 / p.z;
+                    const px = p.x * k + cx;
+                    const py = p.y * k + cy;
+                    const pSize = p.size * k;
+
+                    if (px >= 0 && px <= canvas.width && py >= 0 && py <= canvas.height) {
+                        ctx.font = `${Math.max(10, pSize)}px sans-serif`;
+                        ctx.globalAlpha = Math.min(1, (1000 - p.z) / 400);
+                        ctx.fillText(p.symbol, px, py);
+                    }
+                });
+
+                requestAnimationFrame(animateCanvas);
             }
             animateCanvas();
         }
 
-        function resizeCanvas() {
-            if (!canvas) return;
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-
-        function animateCanvas() {
-            if (!ctx || !canvas) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-
-            foodParticles.forEach(p => {
-                p.z -= p.speed;
-                if (p.z <= 0) p.z = 1000;
-
-                const k = 400 / p.z;
-                const px = p.x * k + cx;
-                const py = p.y * k + cy;
-                const pSize = p.size * k;
-
-                if (px >= 0 && px <= canvas.width && py >= 0 && py <= canvas.height) {
-                    ctx.font = `${Math.max(10, pSize)}px sans-serif`;
-                    ctx.globalAlpha = Math.min(1, (1000 - p.z) / 400);
-                    ctx.fillText(p.symbol, px, py);
-                }
-            });
-
-            requestAnimationFrame(animateCanvas);
-        }
-
         // ANIMAZIONE OMINO NEW YORKER CHE SCARTA E BUTTA LA CARTA A TERRA
-        const guyAvatar = document.getElementById('guy-avatar');
-        const litterContainer = document.getElementById('litter-container');
-        let guyState = 0; // 0: mangia, 1: scarta, 2: butta carta
-
+        let guyState = 0;
         setInterval(() => {
+            const guyAvatar = document.getElementById('guy-avatar');
+            const litterContainer = document.getElementById('litter-container');
             if (!guyAvatar) return;
+
             guyState = (guyState + 1) % 3;
 
             if (guyState === 0) {
-                guyAvatar.innerText = "🧢🧥🍔"; // Morde il panino
+                guyAvatar.innerText = "🧢🧥🍔";
             } else if (guyState === 1) {
-                guyAvatar.innerText = "🧢🧥📦"; // Scarta il panino
+                guyAvatar.innerText = "🧢🧥📦";
             } else {
-                guyAvatar.innerText = "🧢🧥✨"; // Ha finito e butta la carta
-                dropLitterPaper();
+                guyAvatar.innerText = "🧢🧥✨";
+                if (litterContainer) {
+                    const paper = document.createElement('div');
+                    paper.className = 'litter-paper';
+                    paper.innerText = '📄';
+                    litterContainer.appendChild(paper);
+                    setTimeout(() => paper.remove(), 7000);
+                }
             }
-        }, 4000);
-
-        function dropLitterPaper() {
-            if (!litterContainer) return;
-            const paper = document.createElement('div');
-            paper.className = 'litter-paper';
-            paper.innerText = '📄';
-            litterContainer.appendChild(paper);
-
-            // Rimuove la carta dopo 8 secondi per pulire lo schermo
-            setTimeout(() => {
-                paper.remove();
-            }, 8000);
-        }
+        }, 3500);
 
         function playTone(freq = 440, duration = 0.1) {
             if (!state.soundEnabled) return;
@@ -487,17 +486,6 @@
                     ? '<i class="fa-solid fa-volume-high text-sm"></i>' 
                     : '<i class="fa-solid fa-volume-xmark text-zinc-500 text-sm"></i>';
             }
-        }
-
-        function closeIntro() {
-            playTone(523.25);
-            const splash = document.getElementById('intro-splash');
-            const mainApp = document.getElementById('main-app');
-            if (splash) splash.classList.add('opacity-0', 'pointer-events-none');
-            setTimeout(() => {
-                if (splash) splash.style.display = 'none';
-                if (mainApp) mainApp.classList.remove('opacity-0');
-            }, 500);
         }
 
         function renderPresetTags() {
@@ -616,7 +604,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
                             image: base64Image,
-                            prompt: "Analizza questa foto del frigo. Identifica con precisione gli ingredienti visibili (es. uova, peperoni, formaggio, pomodori) ed estrai UNA SOLA ricetta Master Chef dettagliata." 
+                            prompt: "Analizza questa foto del frigo. Identifica con precisione gli ingredienti visibili ed estrai UNA SOLA ricetta Master Chef dettagliata." 
                         })
                     });
 
@@ -718,81 +706,4 @@
                 const response = await fetch('/api/get-recipes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ingredients: queryText })
-                });
-
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-                const data = await response.json();
-                
-                if (data.recipes && Array.isArray(data.recipes) && data.recipes.length > 0) {
-                    renderRecipes([data.recipes[0]]);
-                } else {
-                    throw new Error('Risposta vuota');
-                }
-
-            } catch (err) {
-                console.warn("Backend offline, attivo Master Cookbook locale avanzato:", err);
-                setTimeout(() => {
-                    renderRecipes([getMasterChefFallback(state.ingredients)]);
-                }, 800);
-            } finally {
-                if (loadingSpinner) {
-                    loadingSpinner.classList.add('hidden');
-                    loadingSpinner.classList.remove('flex');
-                }
-            }
-        }
-
-        function getMasterChefFallback(userIngs) {
-            const lowerIngs = userIngs.map(i => i.toLowerCase());
-            const first = userIngs[0];
-
-            let title = `Capolavoro Gastronomico con ${first}`;
-            let steps = "";
-
-            if (lowerIngs.some(i => i.includes('uova')) && lowerIngs.some(i => i.includes('peperoni'))) {
-                title = "Padellata d'Autore con Peperoni e Uova Fondenti";
-                steps = `1. Taglia i peperoni a listarelle sottili e rosolali in padella con un filo d'olio a fuoco vivo per 8 minuti.\n2. Regola di sale e unisci gli altri elementi del frigo (${userIngs.join(', ')}).\n3. Crea spazio nella padella e rompi le uova, cuocendo con coperchio per 4-5 minuti fino a rapprendere l'albume e mantenere il tuorlo cremoso.`;
-            } else {
-                title = `Padellata Master Chef con ${first}`;
-                steps = `1. Prepara la linea tagliando con precisione chirurgica tutti gli ingredienti: ${userIngs.join(', ')}.\n2. Scalda una padella antiaderente a fiamma viva e rosola gli elementi per primi.\n3. Unisci gli altri ingredienti riducendo la fiamma, amalgama con movimenti rapidi (saltare) e servi immediatamente.`;
-            }
-
-            return {
-                title: title,
-                time: "15 min",
-                difficulty: "Intermedia",
-                instructions: steps
-            };
-        }
-
-        function renderRecipes(recipes) {
-            const recipesGrid = document.getElementById('recipes-grid');
-            if (!recipesGrid) return;
-            
-            recipesGrid.innerHTML = recipes.map((recipe) => `
-                <article class="glass-card rounded-3xl p-6 border border-amber-500/30 flex flex-col justify-between shadow-xl">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="px-3 py-1 rounded-full text-[11px] font-extrabold bg-amber-400 text-black">
-                                <i class="fa-solid fa-clock mr-1"></i> ${recipe.time || '15 min'}
-                            </span>
-                            <span class="text-xs text-orange-400 font-bold">
-                                <i class="fa-solid fa-utensils mr-1"></i> ${recipe.difficulty || 'Media'}
-                            </span>
-                        </div>
-
-                        <h4 class="text-xl font-black text-white mb-3">
-                            ${recipe.title}
-                        </h4>
-
-                        <p class="text-xs text-zinc-300 leading-relaxed whitespace-pre-line mb-5">
-                            ${recipe.instructions}
-                        </p>
-                    </div>
-
-                    <div class="pt-4 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400">
-                        <span class="text-[11px] text-amber-400 font-bold"><i class="fa-solid fa-check mr-1"></i>Master Cookbook Standards</span>
-                        <button onclick="copyRecipe('${recipe.title}', '${encodeURIComponent(recipe.instructions)}')" class="px-3 py-1.5 rounded-xl bg-zinc-800 text-white font-bold hover:bg-zinc-700 active:scale-95 transition-all">
-                            <i class="fa-regular fa-
+                    body: JSON.stringify
