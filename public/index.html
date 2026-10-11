@@ -151,7 +151,7 @@
             </div>
             
             <p class="text-zinc-400 text-sm mb-9 font-medium leading-relaxed max-w-xs">
-                Svuota-frigo blindato: accetta solo veri ingredienti commestibili.
+                Svuota-frigo avanzato: ricette gourmet e creative con i tuoi ingredienti.
             </p>
 
             <button id="start-btn" onclick="closeIntro()" class="w-full py-4 text-base font-black text-black bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 rounded-2xl shadow-xl shadow-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-3">
@@ -190,14 +190,14 @@
             <section class="glass-panel rounded-3xl p-5 sm:p-7 relative overflow-hidden">
                 <div class="mb-4">
                     <h2 class="text-2xl font-black text-white tracking-tight mb-1">Cosa c'è in cucina?</h2>
-                    <p class="text-zinc-400 text-xs sm:text-sm">Inserisci solo ingredienti alimentari reali.</p>
+                    <p class="text-zinc-400 text-xs sm:text-sm">Inserisci qualsiasi ingrediente (es. avocado, zenzero, salmone...).</p>
                 </div>
 
                 <!-- Input Box & Camera Button -->
                 <div class="flex items-center gap-2 mb-4">
                     <div class="relative flex-1">
                         <i class="fa-solid fa-basket-shopping absolute left-4 top-1/2 -translate-y-1/2 text-amber-400/80 text-sm"></i>
-                        <input type="text" id="ingredient-input" placeholder="Es. farina 00, pasta, pomodori gialli..." 
+                        <input type="text" id="ingredient-input" placeholder="Es. avocado, zenzero, riso..." 
                             class="w-full glass-input rounded-2xl pl-11 pr-11 py-3.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 transition-all">
                         <button onclick="addCurrentInputIngredient()" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-orange-500 text-black flex items-center justify-center active:scale-90 transition-transform hover:bg-orange-400">
                             <i class="fa-solid fa-plus text-xs"></i>
@@ -272,7 +272,7 @@
                 <!-- Action Button -->
                 <button onclick="generateRecipes()" id="submit-btn" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 active:scale-95 text-black font-black text-base shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center gap-2.5">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    <span>CREA RICETTA SICURA AI</span>
+                    <span>CREA RICETTA CREATIVA AI</span>
                 </button>
             </section>
 
@@ -283,14 +283,14 @@
                         <i class="fa-solid fa-utensils text-amber-400 text-sm"></i>
                         <span>Ricetta Svuota-Frigo Esclusiva</span>
                     </h3>
-                    <span id="recipe-count-badge" class="text-[10px] px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 font-bold border border-orange-500/20">100% Cibo Reale</span>
+                    <span id="recipe-count-badge" class="text-[10px] px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 font-bold border border-orange-500/20">Gourmet & Rapida</span>
                 </div>
 
                 <!-- Loading Spinner -->
                 <div id="loading-spinner" class="hidden glass-panel rounded-3xl p-8 text-center flex-col items-center justify-center">
                     <div class="w-10 h-10 border-4 border-zinc-800 border-t-orange-500 rounded-full animate-spin mb-3"></div>
-                    <h4 class="text-base font-bold text-white mb-1">Lo Chef AI sta verificando gli ingredienti...</h4>
-                    <p class="text-xs text-zinc-400">Controllo di sicurezza e uso esclusivo dei tuoi cibi.</p>
+                    <h4 class="text-base font-bold text-white mb-1">Lo Chef AI sta creando la ricetta...</h4>
+                    <p class="text-xs text-zinc-400">Abbinamento ingredienti e dosaggi esclusivi.</p>
                 </div>
 
                 <!-- Recipe Container -->
@@ -312,11 +312,11 @@
         };
 
         const PRESET_INGREDIENTS = [
-            "Uova", "Pasta", "Riso", "Tonno", "Pomodori gialli", 
-            "Farina 00", "Formaggio", "Pollo", "Pane", "Zucchine"
+            "Avocado", "Zenzero", "Uova", "Pasta", "Riso", 
+            "Tonno", "Pomodori", "Formaggio", "Pollo", "Pane"
         ];
 
-        // Lista di parole non alimentari o pericolose da bloccare categoricamente
+        // Blocco esclusivo per cose palesemente tossiche o non commestibili (es. cacc*, veleno, chiodi, plastica)
         const FORBIDDEN_WORDS = [
             "cacca", "urina", "ricina", "cianuro", "veleno", "tossico", "acido", "candeggina", 
             "detersivo", "ammoniaca", "chiodo", "chiodi", "ferro", "plastica", "vetro", 
@@ -324,26 +324,14 @@
             "bullone", "vite", "moneta", "pila", "batteria", "stoffa", "calzino", "calzini", "scatola"
         ];
 
-        // Whitelist di categorie alimentari consentite (per sicurezza strutturale)
-        const FOOD_KEYWORDS = [
-            "farina", "pasta", "riso", "pane", "uova", "pomodor", "zucch", "formaggi", "pollo",
-            "tonno", "carne", "pesce", "latte", "burro", "olio", "sale", "pepe", "aglio", "cipolla",
-            "patat", "verdur", "frutt", "acqua", "aceto", "spezi", "basilico", "mozzarella", "parmigiano",
-            "integrale", "00", "0", "gialli", "pelati", "passata", "biscotti", "yogurt", "prosciutto", "salame"
-        ];
-
         function isEdible(ingredient) {
             const lower = ingredient.toLowerCase().trim();
-            
-            // 1. Se contiene parole vietate o tossiche, blocca subito
+            // Blocca se contiene parole tossiche o non alimentari
             if (FORBIDDEN_WORDS.some(bad => lower.includes(bad))) {
                 return false;
             }
-
-            // 2. Controllo di validità alimentare: deve contenere almeno una parola o radice di cibo riconosciuta
-            const isRecognizedFood = FOOD_KEYWORDS.some(food => lower.includes(food));
-            
-            return isRecognizedFood;
+            // Accetta tutto il resto (inclusi avocado, zenzero, spezie e qualsiasi cibo esotico o comune)
+            return lower.length > 1;
         }
 
         /* THREE.JS 3D BACKDROP */
@@ -481,7 +469,7 @@
             if (!cleanName) return;
 
             if (!isEdible(cleanName)) {
-                alert(`⚠️ "${cleanName}" non è un alimento valido! Inserisci solo veri ingredienti da cucina (es. farina, pasta, pomodori).`);
+                alert(`⚠️ "${cleanName}" non è un ingrediente valido.`);
                 return;
             }
 
@@ -551,9 +539,9 @@
         function handleMobilePhoto(event) {
             const file = event.target.files[0];
             if (file) {
+                addIngredient("Avocado");
+                addIngredient("Zenzero");
                 addIngredient("Uova");
-                addIngredient("Formaggio");
-                addIngredient("Pomodori gialli");
             }
         }
 
@@ -576,13 +564,7 @@
             const recipesGrid = document.getElementById('recipes-grid');
 
             if (state.ingredients.length === 0) {
-                alert("Aggiungi almeno un ingrediente commestibile valido prima di continuare!");
-                return;
-            }
-
-            const invalidItems = state.ingredients.filter(ing => !isEdible(ing));
-            if (invalidItems.length > 0) {
-                alert(`Rimuovi gli elementi non alimentari (${invalidItems.join(', ')}) per proseguire!`);
+                alert("Aggiungi almeno un ingrediente prima di continuare!");
                 return;
             }
 
@@ -598,8 +580,7 @@
 
             playTone(880);
 
-            // Prompt rigoroso con istruzioni di sicurezza alimentari e blocco totale di ingredienti esterni
-            let queryText = `[SISTEMA DI SICUREZZA: SEI UN APP DI CUCINA SVUOTA-FRIGO. VERIFICA CHE GLI INGREDIENTI SIANO ESCLUSIVAMENTE CIBO REALE]. Crea UNA SOLA ricetta usando ESCLUSIVAMENTE questi ingredienti e nessun altro (è VIETATO aggiungere qualsiasi ingrediente esterno): ${state.ingredients.join(', ')}.`;
+            let queryText = `[SISTEMA SVUOTA-FRIGO]: Crea UNA SOLA ricetta originale, creativa, non banale e sfiziosa usando ESCLUSIVAMENTE questi ingredienti e nessun altro (VIETATO aggiungere ingredienti esterni): ${state.ingredients.join(', ')}. Scrivi passaggi di cucina reali e dettagliati.`;
             if (state.activeFilters.size > 0) {
                 queryText += ` Requisiti: ${Array.from(state.activeFilters).join(', ')}.`;
             }
@@ -622,9 +603,9 @@
                 }
 
             } catch (err) {
-                console.warn("Backend offline, genero ricetta locale esclusiva:", err);
+                console.warn("Backend offline, genero ricetta locale creativa:", err);
                 setTimeout(() => {
-                    renderRecipes([getStrictUniqueRecipe(state.ingredients)]);
+                    renderRecipes([getCreativeUniqueRecipe(state.ingredients)]);
                 }, 800);
             } finally {
                 if (loadingSpinner) {
@@ -634,13 +615,17 @@
             }
         }
 
-        function getStrictUniqueRecipe(userIngs) {
-            const ingsList = userIngs.join(', ');
+        function getCreativeUniqueRecipe(userIngs) {
+            const primary = userIngs[0];
+            const secondary = userIngs[1] ? ` e ${userIngs[1]}` : "";
+            const rest = userIngs.slice(2).join(', ');
+            const extraText = rest ? `, insieme a ${rest}` : "";
+
             return {
-                title: `Piatto Unico Svuota-Frigo con ${userIngs[0]}`,
-                time: "10 min",
-                difficulty: "Facilissimo",
-                instructions: `1. Prendi gli unici ingredienti a disposizione: ${ingsList}.\n2. Uniscili in una padella o ciotola senza aggiungere altri cibi esterni.\n3. Amalgama bene e servi subito.`
+                title: `Creazione Express ${primary}${secondary}`,
+                time: "12 min",
+                difficulty: "Intermedia",
+                instructions: `1. Prepara e pulisci con cura gli ingredienti principali: ${userIngs.join(', ')}.\n2. Inizia lavorando ${primary}${secondary}${extraText} tagliandoli con precisione per favorire l'amalgama dei sapori.\n3. Procedi alla cottura rapida a fuoco vivo o mantecatura delicata senza aggiungere alcun elemento esterno.\n4. Impiatta subito per esaltare consistenza e freschezza.`
             };
         }
 
@@ -653,10 +638,10 @@
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <span class="px-3 py-1 rounded-full text-[11px] font-extrabold bg-amber-400 text-black">
-                                <i class="fa-solid fa-clock mr-1"></i> ${recipe.time || '10 min'}
+                                <i class="fa-solid fa-clock mr-1"></i> ${recipe.time || '12 min'}
                             </span>
                             <span class="text-xs text-orange-400 font-bold">
-                                <i class="fa-solid fa-utensils mr-1"></i> ${recipe.difficulty || 'Facile'}
+                                <i class="fa-solid fa-utensils mr-1"></i> ${recipe.difficulty || 'Media'}
                             </span>
                         </div>
 
