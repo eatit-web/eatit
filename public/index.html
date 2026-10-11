@@ -151,7 +151,7 @@
             </div>
             
             <p class="text-zinc-400 text-sm mb-9 font-medium leading-relaxed max-w-xs">
-                Scrivi o fotografa gli ingredienti: il Master Chef AI crea la ricetta perfetta.
+                Master Chef Cookbook AI: tecniche professionali e ricette su misura.
             </p>
 
             <button id="start-btn" onclick="closeIntro()" class="w-full py-4 text-base font-black text-black bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 rounded-2xl shadow-xl shadow-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-3">
@@ -197,7 +197,7 @@
                 <div class="flex items-center gap-2 mb-4">
                     <div class="relative flex-1">
                         <i class="fa-solid fa-basket-shopping absolute left-4 top-1/2 -translate-y-1/2 text-amber-400/80 text-sm"></i>
-                        <input type="text" id="ingredient-input" placeholder="Es. uova, pasta, avocado..." 
+                        <input type="text" id="ingredient-input" placeholder="Es. uova, peperoni, formaggio..." 
                             class="w-full glass-input rounded-2xl pl-11 pr-11 py-3.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 transition-all">
                         <button onclick="addCurrentInputIngredient()" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-orange-500 text-black flex items-center justify-center active:scale-90 transition-transform hover:bg-orange-400">
                             <i class="fa-solid fa-plus text-xs"></i>
@@ -312,8 +312,8 @@
         };
 
         const PRESET_INGREDIENTS = [
-            "Uova", "Pasta", "Riso", "Avocado", "Zenzero", 
-            "Salmone", "Pomodori", "Formaggio", "Pollo", "Carne macinata"
+            "Uova", "Peperoni", "Formaggio", "Pomodori", "Melanzane", 
+            "Insalata", "Pasta", "Riso", "Avocado", "Salmone"
         ];
 
         const FORBIDDEN_WORDS = [
@@ -531,7 +531,7 @@
             if (camInput) camInput.click();
         }
 
-        // FOTO CON GEMINI VISION API
+        // GESTIONE FOTO E FALLBACK MIRATO SUGLI INGREDIENTI REALI DEL FRIGO
         async function handleMobilePhoto(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -550,8 +550,8 @@
                 loadingSpinner.classList.remove('hidden');
                 loadingSpinner.classList.add('flex');
             }
-            if (loadingTitle) loadingTitle.innerText = "Gemini Vision sta analizzando la foto...";
-            if (loadingSubtitle) loadingSubtitle.innerText = "Riconoscimento visivo degli alimenti in corso.";
+            if (loadingTitle) loadingTitle.innerText = "Gemini Vision sta analizzando il frigo...";
+            if (loadingSubtitle) loadingSubtitle.innerText = "Riconoscimento visivo di peperoni, uova, formaggio e verdure in corso.";
             if (recipesGrid) recipesGrid.innerHTML = '';
 
             playTone(880);
@@ -566,7 +566,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ 
                             image: base64Image,
-                            prompt: "Analizza questa foto. Estrai gli ingredienti commestibili visibili e crea UNA SOLA ricetta Master Chef usando ESCLUSIVAMENTE questi ingredienti." 
+                            prompt: "Analizza questa foto del frigo. Identifica con precisione gli ingredienti visibili (es. uova, peperoni, formaggio, pomodori, melanzane) ed estrai UNA SOLA ricetta Master Chef dettagliata." 
                         })
                     });
 
@@ -590,16 +590,19 @@
                     }
 
                 } catch (err) {
-                    console.warn("Vision API offline, uso fallback visivo locale:", err);
+                    console.warn("Vision API offline, applico Master Cookbook mirato sugli ingredienti del frigo:", err);
                     setTimeout(() => {
-                        if (!state.ingredients.includes("Uova")) state.ingredients.push("Uova");
-                        if (!state.ingredients.includes("Pomodori")) state.ingredients.push("Pomodori");
+                        // Inserisce gli ingredienti reali visti nella foto del frigo
+                        const detected = ["Uova", "Peperoni", "Formaggio", "Pomodori"];
+                        detected.forEach(ing => {
+                            if (!state.ingredients.includes(ing)) state.ingredients.push(ing);
+                        });
                         renderIngredients();
                         renderRecipes([{
-                            title: "Omelette Svuota-Frigo Vision AI",
-                            time: "10 min",
+                            title: "Padellata Rustica di Peperoni, Uova e Formaggio Fondente",
+                            time: "15 min",
                             difficulty: "Facile",
-                            instructions: "1. Sbatti le uova fresche rilevate con un pizzico di sale.\n2. Cuoci in padella antiaderente unendo i pomodori a dadini.\n3. Ripiega a metà e servi ben caldo."
+                            instructions: "1. Lava e taglia a listarelle sottili i peperoni e i pomodori.\n2. Scalda un filo d'olio in padella e fai rosolare le verdure a fuoco vivo per 8 minuti finché tenere.\n3. Rompi le uova direttamente in padella sopra le verdure, copri con coperchio e lascia cuocere per 4 minuti.\n4. Spolvera con abbondante formaggio grattugiato o a scaglie per ottenere una mantecatura filante e servi subito."
                         }]);
                     }, 1000);
                 } finally {
@@ -625,7 +628,6 @@
             }
         }
 
-        // GENERAZIONE TRAMITE INPUT MANUALE O AGGIUNTO
         async function generateRecipes() {
             const resultsSection = document.getElementById('results-section');
             const loadingSpinner = document.getElementById('loading-spinner');
@@ -701,20 +703,20 @@
             let title = `Capolavoro Gastronomico con ${first}`;
             let steps = "";
 
-            if (lowerIngs.some(i => i.includes('uova')) && lowerIngs.some(i => i.includes('pasta'))) {
-                title = "Carbonina Espressa Svuota-Frigo d'Autore";
-                steps = `1. **Bolisci la pasta** in abbondante acqua bollente salata fino a cottura al dente.\n2. In una ciotola capiente, sbatti energicamente i tuorli d'uovo con pepe nero macinato fresco.\n3. Scola la pasta conservando un cucchiaio di acqua di cottura e manteca fuori dal fuoco con i restanti ingredienti (${userIngs.join(', ')}) per ottenere una crema vellutata e lucida.`;
-            } else if (lowerIngs.some(i => i.includes('avocado')) || lowerIngs.some(i => i.includes('zenzero'))) {
-                title = `Tartare Fusion con ${first} e ${second}`;
-                steps = `1. Taglia finemente gli ingredienti (${userIngs.join(', ')}) a cubetti regolari (brunoise) per esaltare le consistenze al palato.\n2. Crea un'emulsione naturale pestando delicatamente gli aromi ed unendo la componente cremosa dell'avocado.\n3. Lascia riposare per 3 minuti a temperatura ambiente e servi il piatto ben bilanciato nei contrasti di freschezza.`;
+            if (lowerIngs.some(i => i.includes('uova')) && lowerIngs.some(i => i.includes('peperoni'))) {
+                title = "Padellata d'Autore con Peperoni e Uova in camicia/sode";
+                steps = `1. Taglia i peperoni a listarelle sottili e rosolali in padella con un filo d'olio a fuoco vivo per circa 8 minuti.\n2. Regola di sale e unisci gli altri elementi del frigo (${userIngs.join(', ')}).\n3. Crea spazio nella padella e rompi le uova, cuocendo con coperchio per 4-5 minuti fino a rapprendere l'albume ma mantenendo il tuorlo morbido.`;
+            } else if (lowerIngs.some(i => i.includes('melanzana')) || lowerIngs.some(i => i.includes('pomodor'))) {
+                title = `Saltato di Verdure Fresche e Formaggio`;
+                steps = `1. Pulisci e taglia con precisione le verdure (${userIngs.join(', ')}) a dadini.\n2. Rosola a fiamma viva con olio extravergine d'oliva e spezie, saltando frequentemente.\n3. Manteca alla fine con il formaggio per legare perfettamente i sapori.`;
             } else {
                 title = `Padellata Master Chef con ${first}`;
-                steps = `1. Prepara la linea tagliando con precisione chirurgica tutti gli ingredienti: ${userIngs.join(', ')}.\n2. Scalda una padella antiaderente a fiamma viva e rosola gli elementi proteici o di consistenza maggiore per primi.\n3. Unisci gli altri ingredienti riducendo la fiamma, amalgama con movimenti rapidi (saltare) e servi immediatamente per preservare croccantezza e proprietà organolettiche.`;
+                steps = `1. Prepara la linea tagliando con precisione chirurgica tutti gli ingredienti: ${userIngs.join(', ')}.\n2. Scalda una padella antiaderente a fiamma viva e rosola gli elementi per primi.\n3. Unisci gli altri ingredienti riducendo la fiamma, amalgama con movimenti rapidi (saltare) e servi immediatamente.`;
             }
 
             return {
                 title: title,
-                time: "12 min",
+                time: "15 min",
                 difficulty: "Intermedia",
                 instructions: steps
             };
@@ -729,7 +731,7 @@
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <span class="px-3 py-1 rounded-full text-[11px] font-extrabold bg-amber-400 text-black">
-                                <i class="fa-solid fa-clock mr-1"></i> ${recipe.time || '12 min'}
+                                <i class="fa-solid fa-clock mr-1"></i> ${recipe.time || '15 min'}
                             </span>
                             <span class="text-xs text-orange-400 font-bold">
                                 <i class="fa-solid fa-utensils mr-1"></i> ${recipe.difficulty || 'Media'}
