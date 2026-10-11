@@ -151,7 +151,7 @@
             </div>
             
             <p class="text-zinc-400 text-sm mb-9 font-medium leading-relaxed max-w-xs">
-                Ricette uniche e veloci con quello che hai in casa. Pronta in 10-15 minuti.
+                Svuota-frigo intelligente con uso esclusivo dei tuoi veri ingredienti.
             </p>
 
             <button id="start-btn" onclick="closeIntro()" class="w-full py-4 text-base font-black text-black bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 rounded-2xl shadow-xl shadow-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-3">
@@ -190,7 +190,7 @@
             <section class="glass-panel rounded-3xl p-5 sm:p-7 relative overflow-hidden">
                 <div class="mb-4">
                     <h2 class="text-2xl font-black text-white tracking-tight mb-1">Cosa c'è in cucina?</h2>
-                    <p class="text-zinc-400 text-xs sm:text-sm">Aggiungi gli ingredienti o scatta una foto al frigo.</p>
+                    <p class="text-zinc-400 text-xs sm:text-sm">Aggiungi solo veri ingredienti commestibili.</p>
                 </div>
 
                 <!-- Input Box & Camera Button -->
@@ -272,7 +272,7 @@
                 <!-- Action Button -->
                 <button onclick="generateRecipes()" id="submit-btn" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 active:scale-95 text-black font-black text-base shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center gap-2.5">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    <span>CREA RICETTA UNICA AI</span>
+                    <span>CREA RICETTA ESCLUSIVA AI</span>
                 </button>
             </section>
 
@@ -281,16 +281,16 @@
                 <div class="flex items-center justify-between px-1">
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-utensils text-amber-400 text-sm"></i>
-                        <span>Ricetta Personalizzata</span>
+                        <span>Ricetta Svuota-Frigo Esclusiva</span>
                     </h3>
-                    <span id="recipe-count-badge" class="text-[10px] px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 font-bold border border-orange-500/20">Unica</span>
+                    <span id="recipe-count-badge" class="text-[10px] px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 font-bold border border-orange-500/20">100% Tuoi Ingredienti</span>
                 </div>
 
                 <!-- Loading Spinner -->
                 <div id="loading-spinner" class="hidden glass-panel rounded-3xl p-8 text-center flex-col items-center justify-center">
                     <div class="w-10 h-10 border-4 border-zinc-800 border-t-orange-500 rounded-full animate-spin mb-3"></div>
-                    <h4 class="text-base font-bold text-white mb-1">Lo Chef AI sta creando la ricetta...</h4>
-                    <p class="text-xs text-zinc-400">Verifica commestibilità e abbinamento sapori.</p>
+                    <h4 class="text-base font-bold text-white mb-1">Lo Chef AI sta componendo la ricetta...</h4>
+                    <p class="text-xs text-zinc-400">Controllo rigoroso: uso esclusivo dei tuoi ingredienti.</p>
                 </div>
 
                 <!-- Recipe Container -->
@@ -316,11 +316,11 @@
             "Zucchine", "Formaggio", "Pollo", "Pane", "Aglio"
         ];
 
-        // Lista nera di elementi non commestibili per la validazione
+        // Lista severa di oggetti non commestibili da bloccare tassativamente
         const NON_EDIBLE_KEYWORDS = [
             "chiodo", "chiodi", "ferro", "plastica", "vetro", "bottiglia", 
             "sasso", "sassi", "pietra", "carta", "legno", "sapone", "metallo", 
-            "bullone", "vite", "moneta", "pila", "batteria", "stoffa"
+            "bullone", "vite", "moneta", "pila", "batteria", "stoffa", "calzino", "calzini", "scatola", "ferro"
         ];
 
         function isEdible(ingredient) {
@@ -328,7 +328,7 @@
             return !NON_EDIBLE_KEYWORDS.some(badWord => lower.includes(badWord));
         }
 
-        /* THREE.JS BACKGROUND */
+        /* THREE.JS 3D BACKDROP (CIBO E INGREDIENTI) */
         let scene, camera, renderer, floatingGroup;
 
         function init3D() {
@@ -363,21 +363,21 @@
                 new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.5 })
             ];
 
-            const count = state.isMobile ? 10 : 16;
+            const count = state.isMobile ? 12 : 20;
             for (let i = 0; i < count; i++) {
                 const geom = foodGeometries[Math.floor(Math.random() * foodGeometries.length)];
                 const mat = foodMaterials[Math.floor(Math.random() * foodMaterials.length)];
                 const mesh = new THREE.Mesh(geom, mat);
 
                 mesh.position.set(
-                    (Math.random() - 0.5) * 22,
-                    (Math.random() - 0.5) * 16,
-                    (Math.random() - 0.5) * 10
+                    (Math.random() - 0.5) * 24,
+                    (Math.random() - 0.5) * 18,
+                    (Math.random() - 0.5) * 12
                 );
 
-                const scale = 0.5 + Math.random() * 0.5;
+                const scale = 0.5 + Math.random() * 0.6;
                 mesh.scale.set(scale, scale, scale);
-                mesh.userData = { rotX: (Math.random() - 0.5) * 0.01, rotY: (Math.random() - 0.5) * 0.01, originalY: mesh.position.y };
+                mesh.userData = { rotX: (Math.random() - 0.5) * 0.015, rotY: (Math.random() - 0.5) * 0.015, originalY: mesh.position.y };
                 floatingGroup.add(mesh);
             }
 
@@ -454,7 +454,7 @@
             if (!cleanName) return;
 
             if (!isEdible(cleanName)) {
-                alert(`⚠️ "${cleanName}" non è un ingrediente commestibile! Inserisci solo cibo.`);
+                alert(`⚠️ "${cleanName}" non è un alimento commestibile! Inserisci solo cibo.`);
                 return;
             }
 
@@ -533,19 +533,17 @@
             }
         }
 
-        /* GENERAZIONE RICETTA UNICA E DIVERSA OGNI VOLTA */
+        /* GENERAZIONE RICETTA CON USO ESCLUSIVO DEGLI INGREDIENTI FORNITI */
         async function generateRecipes() {
             const resultsSection = document.getElementById('results-section');
             const loadingSpinner = document.getElementById('loading-spinner');
             const recipesGrid = document.getElementById('recipes-grid');
 
-            // Verifica presenza ingredienti
             if (state.ingredients.length === 0) {
                 alert("Aggiungi almeno un ingrediente commestibile prima di continuare!");
                 return;
             }
 
-            // Filtro di sicurezza aggiuntivo
             const invalidItems = state.ingredients.filter(ing => !isEdible(ing));
             if (invalidItems.length > 0) {
                 alert(`Rimuovi gli oggetti non commestibili (${invalidItems.join(', ')}) per proseguire!`);
@@ -560,7 +558,8 @@
 
             playTone(880);
 
-            let queryText = `Crea UNA SOLA ricetta originale, sfiziosa e veloce usando SOLO questi ingredienti commestibili: ${state.ingredients.join(', ')}.`;
+            // Prompt rigoroso: vietato aggiungere cibi esterni (niente salumi o ingredienti inventati)
+            let queryText = `Crea UNA SOLA ricetta usando ESCLUSIVAMENTE questi ingredienti e nessun altro (è VIETATO aggiungere qualsiasi ingrediente esterno non presente in questa lista): ${state.ingredients.join(', ')}.`;
             if (state.activeFilters.size > 0) {
                 queryText += ` Requisiti di cottura: ${Array.from(state.activeFilters).join(', ')}.`;
             }
@@ -577,15 +576,15 @@
                 const data = await response.json();
                 
                 if (data.recipes && Array.isArray(data.recipes) && data.recipes.length > 0) {
-                    renderRecipes([data.recipes[0]]); // Prendi solo la prima ricetta unica
+                    renderRecipes([data.recipes[0]]);
                 } else {
                     throw new Error('Risposta vuota');
                 }
 
             } catch (err) {
-                console.warn("Backend non attivo, attivo generatore di ricette uniche locale:", err);
+                console.warn("Backend offline, genero ricetta locale esclusiva:", err);
                 setTimeout(() => {
-                    renderRecipes([getUniqueRecipe(state.ingredients)]);
+                    renderRecipes([getStrictUniqueRecipe(state.ingredients)]);
                 }, 800);
             } finally {
                 loadingSpinner.classList.add('hidden');
@@ -593,80 +592,15 @@
             }
         }
 
-        function getUniqueRecipe(userIngs) {
-            const main = userIngs[0] || "Ingredienti freschi";
-            const rest = userIngs.slice(1).join(', ') || "spezie a piacere";
-
-            const titles = [
-                `Sautè Express di ${main} e ${userIngs[1] || 'Aromi'}`,
-                `Cremofuso Croccante a base di ${main}`,
-                `Tortino Rapido in Padella con ${main}`,
-                `Delizia Fast-Gourmet con ${main}`
-            ];
-
-            const randomTitle = titles[Math.floor(Math.random() * titles.length)];
-
+        function getStrictUniqueRecipe(userIngs) {
+            const ingsList = userIngs.join(', ');
             return {
-                title: randomTitle,
-                time: "10-12 min",
-                difficulty: "Facile",
-                instructions: `1. Taglia finemente ${main} e scalda un filo d'olio in padella antiaderente.\n2. Aggiungi ${rest} e salta a fuoco vivo per 5 minuti finché dorato.\n3. Sfuma con gocce di limone o salsa a piacere, impiatta e servi subito ben caldo!`
+                title: `Piatto Unico Svuota-Frigo con ${userIngs[0]}`,
+                time: "10 min",
+                difficulty: "Facilissimo",
+                instructions: `1. Prendi gli unici ingredienti a disposizione: ${ingsList}.\n2. Uniscili in una padella antiaderente o ciotola senza aggiungere altri cibi esterni.\n3. Amalgama bene e servi subito in tavola.`
             };
         }
 
         function renderRecipes(recipes) {
-            const recipesGrid = document.getElementById('recipes-grid');
-            
-            recipesGrid.innerHTML = recipes.map((recipe) => `
-                <article class="glass-card rounded-3xl p-6 border border-amber-500/30 flex flex-col justify-between shadow-xl">
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="px-3 py-1 rounded-full text-[11px] font-extrabold bg-amber-400 text-black">
-                                <i class="fa-solid fa-clock mr-1"></i> ${recipe.time || '12 min'}
-                            </span>
-                            <span class="text-xs text-orange-400 font-bold">
-                                <i class="fa-solid fa-utensils mr-1"></i> ${recipe.difficulty || 'Facile'}
-                            </span>
-                        </div>
-
-                        <h4 class="text-xl font-black text-white mb-3">
-                            ${recipe.title}
-                        </h4>
-
-                        <p class="text-xs text-zinc-300 leading-relaxed whitespace-pre-line mb-5">
-                            ${recipe.instructions}
-                        </p>
-                    </div>
-
-                    <div class="pt-4 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400">
-                        <span class="text-[11px] text-amber-400 font-bold"><i class="fa-solid fa-sparkles mr-1"></i>Ricetta AI Personalizzata</span>
-                        <button onclick="copyRecipe('${recipe.title}', '${encodeURIComponent(recipe.instructions)}')" class="px-3 py-1.5 rounded-xl bg-zinc-800 text-white font-bold hover:bg-zinc-700 active:scale-95 transition-all">
-                            <i class="fa-regular fa-copy mr-1"></i> Copia
-                        </button>
-                    </div>
-                </article>
-            `).join('');
-
-            playTone(1046.50, 0.2);
-        }
-
-        function copyRecipe(title, encodedInstructions) {
-            const textToCopy = `${title}\n\n${decodeURIComponent(encodedInstructions)}`;
-            const tempInput = document.createElement('textarea');
-            tempInput.value = textToCopy;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-
-            alert('Ricetta copiata negli appunti!');
-        }
-
-        window.onload = function() {
-            init3D();
-            renderPresetTags();
-            renderIngredients();
-        };
-    </script>
-</body>
-</html>
+            const recipesGrid =
