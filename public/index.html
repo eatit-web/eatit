@@ -316,11 +316,10 @@
             "Zucchine", "Formaggio", "Pollo", "Pane", "Aglio"
         ];
 
-        // Lista severa di oggetti non commestibili da bloccare tassativamente
         const NON_EDIBLE_KEYWORDS = [
             "chiodo", "chiodi", "ferro", "plastica", "vetro", "bottiglia", 
             "sasso", "sassi", "pietra", "carta", "legno", "sapone", "metallo", 
-            "bullone", "vite", "moneta", "pila", "batteria", "stoffa", "calzino", "calzini", "scatola", "ferro"
+            "bullone", "vite", "moneta", "pila", "batteria", "stoffa", "calzino", "calzini", "scatola"
         ];
 
         function isEdible(ingredient) {
@@ -328,11 +327,12 @@
             return !NON_EDIBLE_KEYWORDS.some(badWord => lower.includes(badWord));
         }
 
-        /* THREE.JS 3D BACKDROP (CIBO E INGREDIENTI) */
         let scene, camera, renderer, floatingGroup;
 
         function init3D() {
             const container = document.getElementById('canvas-container');
+            if (!container) return;
+            
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.z = 14;
@@ -363,21 +363,21 @@
                 new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.5 })
             ];
 
-            const count = state.isMobile ? 12 : 20;
+            const count = state.isMobile ? 10 : 16;
             for (let i = 0; i < count; i++) {
                 const geom = foodGeometries[Math.floor(Math.random() * foodGeometries.length)];
                 const mat = foodMaterials[Math.floor(Math.random() * foodMaterials.length)];
                 const mesh = new THREE.Mesh(geom, mat);
 
                 mesh.position.set(
-                    (Math.random() - 0.5) * 24,
-                    (Math.random() - 0.5) * 18,
-                    (Math.random() - 0.5) * 12
+                    (Math.random() - 0.5) * 22,
+                    (Math.random() - 0.5) * 16,
+                    (Math.random() - 0.5) * 10
                 );
 
-                const scale = 0.5 + Math.random() * 0.6;
+                const scale = 0.5 + Math.random() * 0.5;
                 mesh.scale.set(scale, scale, scale);
-                mesh.userData = { rotX: (Math.random() - 0.5) * 0.015, rotY: (Math.random() - 0.5) * 0.015, originalY: mesh.position.y };
+                mesh.userData = { rotX: (Math.random() - 0.5) * 0.01, rotY: (Math.random() - 0.5) * 0.01, originalY: mesh.position.y };
                 floatingGroup.add(mesh);
             }
 
@@ -395,10 +395,13 @@
                     child.position.y = child.userData.originalY + Math.sin(Date.now() * 0.001 + idx) * 0.5;
                 });
             }
-            renderer.render(scene, camera);
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+            }
         }
 
         function onWindowResize() {
+            if (!camera || !renderer) return;
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -424,24 +427,28 @@
 
         function toggleAudio() {
             state.soundEnabled = !state.soundEnabled;
-            document.getElementById('audio-btn').innerHTML = state.soundEnabled 
-                ? '<i class="fa-solid fa-volume-high text-sm"></i>' 
-                : '<i class="fa-solid fa-volume-xmark text-zinc-500 text-sm"></i>';
+            const btn = document.getElementById('audio-btn');
+            if (btn) {
+                btn.innerHTML = state.soundEnabled 
+                    ? '<i class="fa-solid fa-volume-high text-sm"></i>' 
+                    : '<i class="fa-solid fa-volume-xmark text-zinc-500 text-sm"></i>';
+            }
         }
 
         function closeIntro() {
             playTone(523.25);
             const splash = document.getElementById('intro-splash');
             const mainApp = document.getElementById('main-app');
-            splash.classList.add('opacity-0', 'pointer-events-none');
+            if (splash) splash.classList.add('opacity-0', 'pointer-events-none');
             setTimeout(() => {
-                splash.style.display = 'none';
-                mainApp.classList.remove('opacity-0');
+                if (splash) splash.style.display = 'none';
+                if (mainApp) mainApp.classList.remove('opacity-0');
             }, 500);
         }
 
         function renderPresetTags() {
             const container = document.getElementById('preset-tags');
+            if (!container) return;
             container.innerHTML = PRESET_INGREDIENTS.map(item => `
                 <button onclick="addIngredient('${item}')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-white/10 shrink-0 transition-all">
                     + ${item}
@@ -454,7 +461,7 @@
             if (!cleanName) return;
 
             if (!isEdible(cleanName)) {
-                alert(`⚠️ "${cleanName}" non è un alimento commestibile! Inserisci solo cibo.`);
+                alert(`"${cleanName}" non è un alimento commestibile! Inserisci solo cibo.`);
                 return;
             }
 
@@ -474,6 +481,7 @@
         function renderIngredients() {
             const container = document.getElementById('active-ingredients-container');
             const hint = document.getElementById('empty-ingredients-hint');
+            if (!container || !hint) return;
 
             if (state.ingredients.length === 0) {
                 hint.classList.remove('hidden');
@@ -494,21 +502,30 @@
 
         function addCurrentInputIngredient() {
             const input = document.getElementById('ingredient-input');
-            if (input.value.trim()) {
+            if (input && input.value.trim()) {
                 addIngredient(input.value.trim());
                 input.value = '';
             }
         }
 
-        document.getElementById('ingredient-input')?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addCurrentInputIngredient();
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputField = document.getElementById('ingredient-input');
+            if (inputField) {
+                inputField.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addCurrentInputIngredient();
+                    }
+                });
             }
+            init3D();
+            renderPresetTags();
+            renderIngredients();
         });
 
         function openCameraInput() {
-            document.getElementById('camera-file-input').click();
+            const camInput = document.getElementById('camera-file-input');
+            if (camInput) camInput.click();
         }
 
         function handleMobilePhoto(event) {
@@ -533,7 +550,6 @@
             }
         }
 
-        /* GENERAZIONE RICETTA CON USO ESCLUSIVO DEGLI INGREDIENTI FORNITI */
         async function generateRecipes() {
             const resultsSection = document.getElementById('results-section');
             const loadingSpinner = document.getElementById('loading-spinner');
@@ -550,18 +566,21 @@
                 return;
             }
 
-            resultsSection.classList.remove('hidden');
-            resultsSection.scrollIntoView({ behavior: 'smooth' });
-            loadingSpinner.classList.remove('hidden');
-            loadingSpinner.classList.add('flex');
-            recipesGrid.innerHTML = '';
+            if (resultsSection) {
+                resultsSection.classList.remove('hidden');
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+            if (loadingSpinner) {
+                loadingSpinner.classList.remove('hidden');
+                loadingSpinner.classList.add('flex');
+            }
+            if (recipesGrid) recipesGrid.innerHTML = '';
 
             playTone(880);
 
-            // Prompt rigoroso: vietato aggiungere cibi esterni (niente salumi o ingredienti inventati)
-            let queryText = `Crea UNA SOLA ricetta usando ESCLUSIVAMENTE questi ingredienti e nessun altro (è VIETATO aggiungere qualsiasi ingrediente esterno non presente in questa lista): ${state.ingredients.join(', ')}.`;
+            let queryText = `Crea UNA SOLA ricetta usando ESCLUSIVAMENTE questi ingredienti e nessun altro (è VIETATO aggiungere qualsiasi ingrediente esterno): ${state.ingredients.join(', ')}.`;
             if (state.activeFilters.size > 0) {
-                queryText += ` Requisiti di cottura: ${Array.from(state.activeFilters).join(', ')}.`;
+                queryText += ` Requisiti: ${Array.from(state.activeFilters).join(', ')}.`;
             }
 
             try {
@@ -587,8 +606,10 @@
                     renderRecipes([getStrictUniqueRecipe(state.ingredients)]);
                 }, 800);
             } finally {
-                loadingSpinner.classList.add('hidden');
-                loadingSpinner.classList.remove('flex');
+                if (loadingSpinner) {
+                    loadingSpinner.classList.add('hidden');
+                    loadingSpinner.classList.remove('flex');
+                }
             }
         }
 
@@ -598,9 +619,57 @@
                 title: `Piatto Unico Svuota-Frigo con ${userIngs[0]}`,
                 time: "10 min",
                 difficulty: "Facilissimo",
-                instructions: `1. Prendi gli unici ingredienti a disposizione: ${ingsList}.\n2. Uniscili in una padella antiaderente o ciotola senza aggiungere altri cibi esterni.\n3. Amalgama bene e servi subito in tavola.`
+                instructions: `1. Prendi gli unici ingredienti a disposizione: ${ingsList}.\n2. Uniscili in una padella o ciotola senza aggiungere altri cibi esterni.\n3. Amalgama bene e servi subito.`
             };
         }
 
         function renderRecipes(recipes) {
-            const recipesGrid =
+            const recipesGrid = document.getElementById('recipes-grid');
+            if (!recipesGrid) return;
+            
+            recipesGrid.innerHTML = recipes.map((recipe) => `
+                <article class="glass-card rounded-3xl p-6 border border-amber-500/30 flex flex-col justify-between shadow-xl">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 rounded-full text-[11px] font-extrabold bg-amber-400 text-black">
+                                <i class="fa-solid fa-clock mr-1"></i> ${recipe.time || '10 min'}
+                            </span>
+                            <span class="text-xs text-orange-400 font-bold">
+                                <i class="fa-solid fa-utensils mr-1"></i> ${recipe.difficulty || 'Facile'}
+                            </span>
+                        </div>
+
+                        <h4 class="text-xl font-black text-white mb-3">
+                            ${recipe.title}
+                        </h4>
+
+                        <p class="text-xs text-zinc-300 leading-relaxed whitespace-pre-line mb-5">
+                            ${recipe.instructions}
+                        </p>
+                    </div>
+
+                    <div class="pt-4 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400">
+                        <span class="text-[11px] text-amber-400 font-bold"><i class="fa-solid fa-check mr-1"></i>Uso esclusivo tuoi ingredienti</span>
+                        <button onclick="copyRecipe('${recipe.title}', '${encodeURIComponent(recipe.instructions)}')" class="px-3 py-1.5 rounded-xl bg-zinc-800 text-white font-bold hover:bg-zinc-700 active:scale-95 transition-all">
+                            <i class="fa-regular fa-copy mr-1"></i> Copia
+                        </button>
+                    </div>
+                </article>
+            `).join('');
+
+            playTone(1046.50, 0.2);
+        }
+
+        function copyRecipe(title, encodedInstructions) {
+            const textToCopy = `${title}\n\n${decodeURIComponent(encodedInstructions)}`;
+            const tempInput = document.createElement('textarea');
+            tempInput.value = textToCopy;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            alert('Ricetta copiata negli appunti!');
+        }
+    </script>
+</body>
+</html>
