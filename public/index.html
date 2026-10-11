@@ -151,7 +151,7 @@
             </div>
             
             <p class="text-zinc-400 text-sm mb-9 font-medium leading-relaxed max-w-xs">
-                Chef Cookbook AI: tecniche di cucina reali per i tuoi ingredienti.
+                Chef Cookbook AI: ricette dettagliate, precise e sfiziose.
             </p>
 
             <button id="start-btn" onclick="closeIntro()" class="w-full py-4 text-base font-black text-black bg-gradient-to-r from-amber-400 to-orange-500 hover:brightness-110 rounded-2xl shadow-xl shadow-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-3">
@@ -190,14 +190,14 @@
             <section class="glass-panel rounded-3xl p-5 sm:p-7 relative overflow-hidden">
                 <div class="mb-4">
                     <h2 class="text-2xl font-black text-white tracking-tight mb-1">Cosa c'è in cucina?</h2>
-                    <p class="text-zinc-400 text-xs sm:text-sm">Inserisci gli ingredienti (es. riso, salmone, alghe, avocado...).</p>
+                    <p class="text-zinc-400 text-xs sm:text-sm">Inserisci gli ingredienti (es. carne macinata, platano, guacamole...).</p>
                 </div>
 
                 <!-- Input Box & Camera Button -->
                 <div class="flex items-center gap-2 mb-4">
                     <div class="relative flex-1">
                         <i class="fa-solid fa-basket-shopping absolute left-4 top-1/2 -translate-y-1/2 text-amber-400/80 text-sm"></i>
-                        <input type="text" id="ingredient-input" placeholder="Es. riso, salmone, alghe..." 
+                        <input type="text" id="ingredient-input" placeholder="Es. carne macinata, platano, guacamole..." 
                             class="w-full glass-input rounded-2xl pl-11 pr-11 py-3.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 transition-all">
                         <button onclick="addCurrentInputIngredient()" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-orange-500 text-black flex items-center justify-center active:scale-90 transition-transform hover:bg-orange-400">
                             <i class="fa-solid fa-plus text-xs"></i>
@@ -290,7 +290,7 @@
                 <div id="loading-spinner" class="hidden glass-panel rounded-3xl p-8 text-center flex-col items-center justify-center">
                     <div class="w-10 h-10 border-4 border-zinc-800 border-t-orange-500 rounded-full animate-spin mb-3"></div>
                     <h4 class="text-base font-bold text-white mb-1">Lo Chef AI sta studiando il Cookbook...</h4>
-                    <p class="text-xs text-zinc-400">Applicazione di tecniche culinarie reali (bollitura, marinatura, taglio).</p>
+                    <p class="text-xs text-zinc-400">Creazione di istruzioni passo-passo reali e precise.</p>
                 </div>
 
                 <!-- Recipe Container -->
@@ -312,8 +312,8 @@
         };
 
         const PRESET_INGREDIENTS = [
-            "Riso", "Salmone", "Alghe", "Avocado", "Uova", 
-            "Pasta", "Pomodori", "Formaggio", "Pollo", "Pane"
+            "Carne macinata", "Platano", "Guacamole", "Pasta", "Riso", 
+            "Salmone", "Uova", "Pomodori", "Formaggio", "Pollo"
         ];
 
         const FORBIDDEN_WORDS = [
@@ -534,9 +534,9 @@
         function handleMobilePhoto(event) {
             const file = event.target.files[0];
             if (file) {
-                addIngredient("Riso");
-                addIngredient("Salmone");
-                addIngredient("Alghe");
+                addIngredient("Carne macinata");
+                addIngredient("Platano");
+                addIngredient("Guacamole");
             }
         }
 
@@ -549,7 +549,6 @@
             } else {
                 state.activeFilters.add(filterKey);
                 btn.classList.add('active-filter');
-                playTechTone = 783.99;
                 playTone(783.99);
             }
         }
@@ -576,12 +575,10 @@
 
             playTone(880);
 
-            // PROMPT PROFESSIONALE DA CHEF COOKBOOK
             let queryText = `[PROMPT STILE CHEF COOKBOOK]: Sei uno Chef Professionale. Crea UNA SOLA ricetta culinaria avanzata, corretta e coerente usando ESCLUSIVAMENTE questi ingredienti e nessun altro (VIETATO aggiungere ingredienti esterni): ${state.ingredients.join(', ')}. 
             REGOLE TECNICHE OBBLIGATORIE:
-            1. Applica le corrette tecniche di cottura per ogni ingrediente (es. se c'è riso o pasta va bollito/lessato, se c'è carne o pesce crudo va trattato o cotto adeguatamente in base alla natura dell'ingrediente, se ci sono verdure vanno tagliate e saltate correttamente).
-            2. Non inventare passaggi assurdi (es. non dire di spadellare il riso crudo o bollire cose che non si bollono).
-            3. Descrivi passaggi di cucina reali, strutturati in ordine cronologico.`;
+            1. Usa la terminologia e la procedura corretta per ogni elemento (es. la carne si rosola in padella, la pasta si bollisce in acqua salata, il platano/patate si friggono o cuociono a fette, le salse fredde come guacamole si usano per accompagnare alla fine).
+            2. Descrivi passaggi specifici e dettagliati per ciascun ingrediente, spiegando esattamente COME prepararlo e assemblarlo.`;
 
             if (state.activeFilters.size > 0) {
                 queryText += ` Requisiti: ${Array.from(state.activeFilters).join(', ')}.`;
@@ -617,24 +614,31 @@
             }
         }
 
+        // GENERATORE AVANZATO SPECIFICO PER OGNI CATEGORIA ALIMENTARE
         function getSmartChefRecipe(userIngs) {
-            const hasRiso = userIngs.some(i => i.toLowerCase().includes('riso'));
-            const hasPasta = userIngs.some(i => i.toLowerCase().includes('pasta'));
-            const hasSalmone = userIngs.some(i => i.toLowerCase().includes('salmone'));
-            const hasAlghe = userIngs.some(i => i.toLowerCase().includes('alghe'));
+            const lowerIngs = userIngs.map(i => i.toLowerCase());
 
-            let title = `Piatto Chef con ${userIngs[0]}`;
+            const hasCarne = lowerIngs.some(i => i.includes('carne') || i.includes('macinato') || i.includes('pollo'));
+            const hasPlatano = lowerIngs.some(i => i.includes('platano') || i.includes('patat'));
+            const hasSalsa = lowerIngs.some(i => i.includes('guacamole') || i.includes('salsa') || i.includes('maionese'));
+            const hasPasta = lowerIngs.some(i => i.includes('pasta'));
+            const hasRiso = lowerIngs.some(i => i.includes('riso'));
+
+            let title = `Piatto Gourmet con ${userIngs[0]}`;
             let steps = "";
 
-            if (hasRiso && hasSalmone) {
-                title = "Bowl Aperta di Riso e Salmone Svuota-Frigo";
-                steps = `1. Porta a bollore l'acqua e cuoci il riso fino a completa cottura, quindi scolalo e lascialo intiepidire.\n2. Taglia il salmone a cubetti regolari (o listarelle sottili).\n3. Se presenti, sminuzza le alghe per guarnire.\n4. Componi il piatto disponendo il riso alla base e adagiando sopra il salmone e le alghe, amalgamando con cura i sapori naturali.`;
+            if (hasCarne && hasPlatano && hasSalsa) {
+                title = "Tostones Croccanti di Platano con Carne Rosolata e Guacamole";
+                steps = `1. Sbuccia il platano e taglialo a fette spesse circa 2 cm. Scalda un filo d'olio e friggile o dorale finché sono dorate su entrambi i lati.\n2. In un'altra padella ben calda, rosola la carne macinata sgranandola bene finché risulta ben dorata e succosa.\n3. Impiatta disponendo i dischi di platano croccante alla base, adagia sopra la carne macinata calda e completa guarnendo generosamente con il guacamole fresco.`;
             } else if (hasPasta) {
-                title = `Pasta Mantecata con ${userIngs[1] || 'Ingredienti del Frigo'}`;
-                steps = `1. Metti a bollire l'acqua salata e cuoci la pasta.\n2. Nel frattempo, prepara i restanti ingredienti (${userIngs.join(', ')}) tagliandoli delle giuste dimensioni.\n3. Scolla la pasta al dente e uniscila agli ingredienti in padella o ciotola per mantecare perfettamente.`;
+                title = `Primo Piatto Mantecato con ${userIngs[0]}`;
+                steps = `1. Metti a bollire abbondante acqua, salala e **bollisci la pasta** fino a cottura ottimale.\n2. Nel frattempo, prepara gli altri ingredienti (${userIngs.join(', ')}) tagliandoli accuratamente.\n3. Unisci la pasta scolata direttamente agli ingredienti in padella per amalgamarne i sapori e servi subito.`;
+            } else if (hasRiso) {
+                title = `Riso Cotto alla Perfettazione con ${userIngs[0]}`;
+                steps = `1. **Bolli il riso** in acqua bollente salata seguendo i tempi indicati.\n2. Prepara il condimento con i restanti ingredienti (${userIngs.join(', ')}).\n3. Scola il riso, uniscilo agli altri elementi e manteca con cura.`;
             } else {
-                title = `Preparazione Culinaria con ${userIngs.join(', ')}`;
-                steps = `1. Seleziona e pulisci con attenzione gli ingredienti: ${userIngs.join(', ')}.\n2. Rispetta i tempi di cottura specifici di ciascun elemento (bollitura per cereali/pasta, cottura o marinatura per proteine).\n3. Unisci le preparazioni seguendo una logica gastronomica coerente e servi in tavola.`;
+                title = `Cottura & Composizione con ${userIngs.join(', ')}`;
+                steps = `1. Pulisci e taglia con cura gli ingredienti principali: ${userIngs.join(', ')}.\n2. Cuoci gli elementi caldi (carne, pesce o verdure) in padella con cottura viva per 6-8 minuti.\n3. Accoppia gli ingredienti freschi o salse alla fine per mantenere contrasti di temperatura e consistenza.`;
             }
 
             return {
