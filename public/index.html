@@ -366,9 +366,8 @@
             return lower.length > 1;
         }
 
-        /* FUNZIONE CHIUSURA INTRO RISOLTA */
+        // CHIUSURA INTRO SICURA
         function closeIntro() {
-            playTone(523.25);
             const splash = document.getElementById('intro-splash');
             if (splash) {
                 splash.style.opacity = '0';
@@ -379,9 +378,7 @@
             }
         }
 
-        /* ANIMAZIONE CANVAS 2D/3D (CIBO CHE VIENE VERSO DI TE) */
-        let foodParticles = [];
-
+        // CANVAS SFONDO
         function initCanvas() {
             const canvas = document.getElementById('bg-canvas');
             if (!canvas) return;
@@ -396,8 +393,8 @@
 
             const symbols = ['🍔', '🍕', '🥗', '🥑', '🍳', '🍅', '🧀'];
             const count = state.isMobile ? 12 : 22;
+            const foodParticles = [];
 
-            foodParticles = [];
             for (let i = 0; i < count; i++) {
                 foodParticles.push({
                     x: (Math.random() - 0.5) * window.innerWidth,
@@ -435,7 +432,7 @@
             animateCanvas();
         }
 
-        // ANIMAZIONE OMINO NEW YORKER CHE SCARTA E BUTTA LA CARTA A TERRA
+        // OMINO NEW YORKER
         let guyState = 0;
         setInterval(() => {
             const guyAvatar = document.getElementById('guy-avatar');
@@ -459,24 +456,6 @@
                 }
             }
         }, 3500);
-
-        function playTone(freq = 440, duration = 0.1) {
-            if (!state.soundEnabled) return;
-            try {
-                const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                const ctx = new AudioCtx();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, ctx.currentTime);
-                gain.gain.setValueAtTime(0.06, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + duration);
-            } catch (e) {}
-        }
 
         function toggleAudio() {
             state.soundEnabled = !state.soundEnabled;
@@ -510,13 +489,11 @@
             if (state.ingredients.includes(cleanName)) return;
 
             state.ingredients.push(cleanName);
-            playTone(659.25);
             renderIngredients();
         }
 
         function removeIngredient(index) {
             state.ingredients.splice(index, 1);
-            playTone(349.23);
             renderIngredients();
         }
 
@@ -592,8 +569,6 @@
             if (loadingSubtitle) loadingSubtitle.innerText = "Riconoscimento visivo di peperoni, uova, formaggio e verdure in corso.";
             if (recipesGrid) recipesGrid.innerHTML = '';
 
-            playTone(880);
-
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const base64Image = e.target.result;
@@ -657,11 +632,9 @@
             if (state.activeFilters.has(filterKey)) {
                 state.activeFilters.delete(filterKey);
                 btn.classList.remove('active-filter');
-                playTone(392);
             } else {
                 state.activeFilters.add(filterKey);
                 btn.classList.add('active-filter');
-                playTone(783.99);
             }
         }
 
@@ -689,8 +662,6 @@
             if (loadingSubtitle) loadingSubtitle.innerText = "Elaborazione tecniche avanzate e abbinamenti di sapore.";
             if (recipesGrid) recipesGrid.innerHTML = '';
 
-            playTone(880);
-
             let queryText = `[MASTER CHEF COOKBOOK SYSTEM]: Agisci come un Executive Chef di altissimo livello. 
             Crea UNA SOLA ricetta straordinaria, originale, gustosa e curata nei minimi dettagli usando ESCLUSIVAMENTE questi ingredienti e nessun altro (VIETATO aggiungere ingredienti esterni non presenti in lista): ${state.ingredients.join(', ')}.
             REGOLE TASSATIVE DI CUCINA:
@@ -706,4 +677,100 @@
                 const response = await fetch('/api/get-recipes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify
+                    body: JSON.stringify({ ingredients: queryText })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                
+                if (data.recipes && Array.isArray(data.recipes) && data.recipes.length > 0) {
+                    renderRecipes([data.recipes[0]]);
+                } else {
+                    throw new Error('Risposta vuota');
+                }
+
+            } catch (err) {
+                console.warn("Backend offline, attivo Master Cookbook locale avanzato:", err);
+                setTimeout(() => {
+                    renderRecipes([getMasterChefFallback(state.ingredients)]);
+                }, 800);
+            } finally {
+                if (loadingSpinner) {
+                    loadingSpinner.classList.add('hidden');
+                    loadingSpinner.classList.remove('flex');
+                }
+            }
+        }
+
+        function getMasterChefFallback(userIngs) {
+            const lowerIngs = userIngs.map(i => i.toLowerCase());
+            const first = userIngs[0];
+
+            let title = `Capolavoro Gastronomico con ${first}`;
+            let steps = "";
+
+            if (lowerIngs.some(i => i.includes('uova')) && lowerIngs.some(i => i.includes('peperoni'))) {
+                title = "Padellata d'Autore con Peperoni e Uova Fondenti";
+                steps = `1. Taglia i peperoni a listarelle sottili e rosolali in padella con un filo d'olio a fuoco vivo per 8 minuti.\n2. Regola di sale e unisci gli altri elementi del frigo (${userIngs.join(', ')}).\n3. Crea spazio nella padella e rompi le uova, cuocendo con coperchio per 4-5 minuti fino a rapprendere l'albume e mantenere il tuorlo cremoso.`;
+            } else {
+                title = `Padellata Master Chef con ${first}`;
+                steps = `1. Prepara la linea tagliando con precisione chirurgica tutti gli ingredienti: ${userIngs.join(', ')}.\n2. Scalda una padella antiaderente a fiamma viva e rosola gli elementi per primi.\n3. Unisci gli altri ingredienti riducendo la fiamma, amalgama con movimenti rapidi (saltare) e servi immediatamente.`;
+            }
+
+            return {
+                title: title,
+                time: "15 min",
+                difficulty: "Intermedia",
+                instructions: steps
+            };
+        }
+
+        function renderRecipes(recipes) {
+            const recipesGrid = document.getElementById('recipes-grid');
+            if (!recipesGrid) return;
+            
+            recipesGrid.innerHTML = recipes.map((recipe) => `
+                <article class="glass-card rounded-3xl p-6 border border-amber-500/30 flex flex-col justify-between shadow-xl">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 rounded-full text-[11px] font-extrabold bg-amber-400 text-black">
+                                <i class="fa-solid fa-clock mr-1"></i> ${recipe.time || '15 min'}
+                            </span>
+                            <span class="text-xs text-orange-400 font-bold">
+                                <i class="fa-solid fa-utensils mr-1"></i> ${recipe.difficulty || 'Media'}
+                            </span>
+                        </div>
+
+                        <h4 class="text-xl font-black text-white mb-3">
+                            ${recipe.title}
+                        </h4>
+
+                        <p class="text-xs text-zinc-300 leading-relaxed whitespace-pre-line mb-5">
+                            ${recipe.instructions}
+                        </p>
+                    </div>
+
+                    <div class="pt-4 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400">
+                        <span class="text-[11px] text-amber-400 font-bold"><i class="fa-solid fa-check mr-1"></i>Master Cookbook Standards</span>
+                        <button onclick="copyRecipe('${recipe.title}', '${encodeURIComponent(recipe.instructions)}')" class="px-3 py-1.5 rounded-xl bg-zinc-800 text-white font-bold hover:bg-zinc-700 active:scale-95 transition-all">
+                            <i class="fa-regular fa-copy mr-1"></i> Copia
+                        </button>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        function copyRecipe(title, encodedInstructions) {
+            const textToCopy = `${title}\n\n${decodeURIComponent(encodedInstructions)}`;
+            const tempInput = document.createElement('textarea');
+            tempInput.value = textToCopy;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            alert('Ricetta copiata negli appunti!');
+        }
+    </script>
+</body>
+</html>
